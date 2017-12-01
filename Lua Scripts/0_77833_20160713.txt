@@ -1,0 +1,881 @@
+--[[
+Advanced aerial AI, version 4.21
+Created by Madwand 10/24/2015
+Use and modify this code however you like, however please credit me
+if you use this AI or a derivative of it in a tournament, or you publish a blueprint
+using it. Also let me know if you make any significant improvements,
+so I can add them back into the code.
+ 
+Documentation on the options is available at http://pastebin.com/36eFGAzV
+--]]
+ 
+-- BASIC OPTIONS
+AngleBeforeTurn = 0
+AngleBeforeRoll = 50
+AttackRunDistance = 2000
+AbortRunDistance = 100
+ClosingDistance = 1000
+ForceAttackTime = 15
+CruiseAltitude = 500
+MaxElevationAngle = 40
+CruiseSpeed = 5
+AttackRunSpeed = 4
+EscapeSpeed = 5
+RollingSpeed = 5
+ClosingSpeed = 5
+OrbitSpawn = true
+ 
+-- AIRSHIP/HELICOPTER OPTIONS
+UseAltitudeJets = false
+UseSpinners = false
+MinHelicopterBladeSpeed = 10
+MaxHelicopterBladeSpeed = 30
+UseVTOLBeneathSpeed = 0
+VTOLEngines = nil
+ 
+-- TERRAIN AVOIDANCE OPTIONS
+TerrainAvoidanceStrategy = 1
+MinAltitude = 100
+MaxAltitude = 400
+TerrainLookahead = {0,1,2,4}
+MaxTerrainSpeed = 5
+ 
+-- WATER START OPTIONS
+DeployAlt = 5
+ReleaseAlt = 15
+EnableEnginesAlt = 5
+ 
+-- COLLISION AVOIDANCE OPTIONS
+CollisionTThreshold = 4
+CollisionDetectionHeight = 30
+CollisionAngle = 40
+ 
+-- FLOCKING OPTIONS
+NeighborRadius = 200
+IgnoreBelowSpeed = 0
+FlockWithBlueprintNames = 'all'
+AlignmentWeight = 1
+CohesionWeight = 1
+SeparationWeight = 1.5
+InjuredWeight = 0
+LongRangeWeight = .5
+TerrainAvoidanceWeight = 0
+TargetWeight = 1
+ 
+-- "DOGFIGHTING" OPTIONS
+MatchTargetAltitude = false
+MatchAltitudeRange = 300
+MatchAltitudeOffset = 0
+MinMatchingAltitude = 100
+ 
+-- VECTOR THRUST OPTIONS
+VTSpinners = nil
+MaxVTAngle = {30,30,30,90} -- yaw, roll, pitch, VTOL
+VTProportional = {1,1,1}
+VTDelta = {.1,.1,0}
+VTOLSpinners = 'all'
+ 
+-- MISSILE AVOIDANCE OPTIONS
+WarningMainframe = -1
+RunAwayTTT = 2
+RunAngle = 180
+DodgeTTT = 1
+DodgingRollTolerance = 60
+DangerRadius = 20
+NormalSpeed = 100
+CraftRadius = 10
+DodgingSpeed = 5
+ 
+-- ADVANCED OPTIONS
+MODE = 2
+AltitudeClamp = .2
+PitchDamping = 90
+YawDamping = 90
+RollDamping = 45
+MainDriveControlType = 0
+MinimumSpeed = 0
+MaximumSpeed = 999
+MaxRollAngle = 100
+RollTolerance = 30
+DebugMode = false
+UsePreferredSide = false
+UsePredictiveGuidance = false
+AltitudeOffset = 0
+AngleOfEscape = AngleBeforeTurn
+ExcludeSpinners = nil
+ 
+--Static variables. Do not change these.
+DRIVELEFT = 0
+DRIVERIGHT = 1
+ROLLLEFT = 2
+ROLLRIGHT = 3
+DRIVEUP = 4
+DRIVEDOWN = 5
+DRIVEMAIN = 8
+DriveTypeDesc = {'Left','Right','RLeft','RRight','PUp','PDown','','','Main'}
+ 
+firstpass = true
+state = "cruise"
+onattackrun = false
+WaterStarted = false
+NextAttackTime = 0
+OverTerrain = false
+PitchCorrection = 0
+RollSpinners = {}
+PitchSpinners = {}
+YawSpinners = {}
+DownSpinners = {}
+AllSpinners = {}
+ExcludedSpinners = {}
+HeliSpinners = {}
+RollEngines = {}
+PitchEngines = {}
+EngineDF = {}
+SpinnerStartRotations={}
+DYaw = 0
+NumSpinners = 0
+NumEngines = 0
+ 
+--Try to pitch (or yaw, if necessary) to a given angle of elevation
+function AdjustElevationToAngle(I,DesiredElevation)
+  local PitchSpeedCheck = math.abs(DesiredElevation-Pitch)/PitchDamping
+  local YawSpeedCheck = math.abs(DesiredElevation-Pitch)/YawDamping
+  if (Pitch > DesiredElevation) then
+    if (math.abs(Roll)>135) then
+      Control(I,DRIVEUP,PitchSpeedCheck,DPitch)
+    elseif (Roll<-45) then
+      Control(I,DRIVERIGHT,YawSpeedCheck,DYaw)
+    elseif (Roll>45) then
+      Control(I,DRIVELEFT,YawSpeedCheck,-DYaw)
+    elseif (math.abs(Roll)<45 and state~="rolling") then
+      Control(I,DRIVEDOWN,PitchSpeedCheck,-DPitch)
+    end
+  elseif (Pitch < DesiredElevation) then
+    if (math.abs(Roll)>135 and state~="rolling") then
+      Control(I,DRIVEDOWN,PitchSpeedCheck,-DPitch)
+    elseif (Roll<-45) then
+      Control(I,DRIVELEFT,YawSpeedCheck,-DYaw)
+    elseif (Roll>45) then
+      Control(I,DRIVERIGHT,YawSpeedCheck,DYaw)
+    elseif (math.abs(Roll)<45) then
+      Control(I,DRIVEUP,PitchSpeedCheck,DPitch)
+    end
+  end
+end
+ 
+--Calculate desired altitude and go there
+function AdjustAltitude(I, Engaged, Pos, CollisionAlt)
+  local DesiredAltitude = CruiseAltitude
+  local MatchingAltitude = Engaged and MatchTargetAltitude and Pos.GroundDistance < MatchAltitudeRange
+  if MatchingAltitude then
+    local EnemyAlt = UsePredictiveGuidance and CollisionAlt or Pos.AltitudeAboveSeaLevel
+    DesiredAltitude = math.max(math.min(EnemyAlt+MatchAltitudeOffset,MaxAltitude),MinMatchingAltitude)
+  end
+ 
+  if (TerrainAvoidanceStrategy>0) then
+    DesiredAltitude = AdjustAltitudeForTerrain(I, DesiredAltitude, MatchingAltitude)
+  end
+ 
+  local AltPower = limiter((DesiredAltitude-Alt)*AltitudeClamp,1)
+  if ((Alt < DesiredAltitude or VTOLEngines) and I:GetVelocityMagnitude()<UseVTOLBeneathSpeed) then
+    VTPower[4]=math.max(.2,AltPower)
+    AdjustElevationToAngle(I, 0)
+  else
+    local Angle = math.min(math.abs(Alt-DesiredAltitude)*AltitudeClamp,MaxElevationAngle)
+    if ((Alt<MinAltitude and Pitch<0) or (Alt>MaxAltitude and Pitch>0)) then
+      Angle = MaxElevationAngle
+    end -- pull up/down with full strength if we are below/above min/max altitudes
+    AdjustElevationToAngle(I, (Alt < DesiredAltitude) and Angle or -Angle)
+  end
+ 
+  AdjustAltitudeJets(I,AltPower)
+  AdjustHelicopterBlades(I,AltPower)
+ 
+  return DesiredAltitude
+end
+ 
+function AdjustAltitudeJets(I,AltPower)
+  if not UseAltitudeJets then return end
+  if (AltPower>0) then
+    I:RequestThrustControl(4,AltPower)
+    vertical = "up"
+  else
+    I:RequestThrustControl(5,-AltPower)
+    vertical = "down"
+  end
+end
+ 
+function ControlVTOLPower(I)
+  local DriveFraction = {}
+  if VTPower[4]~=0 then
+    for k,v in pairs(PitchEngines) do DriveFraction[k] = VTPower[4]*EngineDF[k] end
+    ComputeEngines(DriveFraction, RollEngines, 2)
+    ComputeEngines(DriveFraction, PitchEngines, 3)
+  else
+    for k,v in pairs(PitchEngines) do DriveFraction[k] = EngineDF[k] end
+  end
+  for k, v in pairs(PitchEngines) do I:Component_SetFloatLogic(9,k,DriveFraction[k]) end
+end
+ 
+function AdjustHelicopterBlades(I,AltPower)
+  if not UseSpinners then return end
+  local MidSpeed = (MaxHelicopterBladeSpeed-MinHelicopterBladeSpeed)/2
+  local SpinSpeed = MinHelicopterBladeSpeed+MidSpeed+AltPower*MidSpeed
+  if not VTSpinners then
+    for p = 0, NumSpinners-1 do
+      if not ExcludedSpinners[p] then I:SetSpinnerContinuousSpeed(p, SpinSpeed) end
+    end
+  else
+    for k,v in pairs(HeliSpinners) do I:SetSpinnerContinuousSpeed(v, SpinSpeed) end
+  end
+end
+ 
+-- Get the current stats about angles of the vehicle
+function GetAngleStats(I)
+  Roll = I:GetConstructRoll()
+-- transform roll into roll we are familiar with from the game
+  if (Roll > 180) then Roll = Roll-360 end
+ 
+  Pitch = I:GetConstructPitch()
+-- transform pitch into pitch we are familiar with from the game
+  if (Pitch > 180) then
+    Pitch = 360 - Pitch
+  elseif (Pitch>0) then
+    Pitch = -Pitch
+  end
+ 
+  Yaw = I:GetConstructYaw()
+ 
+-- Many vehicles need to keep their nose pitched upwards relative to velocity.
+-- This uses basic machine learning to calculate the upwards pitch correction.
+  if not VTPower or VTPower[4]==0 then -- if we haven't been in VTOL mode
+    VPitch = math.deg(math.asin(I:GetVelocityVectorNormalized().y)) -- observed pitch from velocity
+    PitchCorrection = limiter(PitchCorrection + .01*(Pitch-VPitch-PitchCorrection),MaxElevationAngle)
+    Pitch = Pitch - PitchCorrection
+  end
+ 
+  local AngularVelocity = I:GetLocalAngularVelocity()
+  DPitch = -AngularVelocity.x
+  DYaw = DYaw+.1*(AngularVelocity.y-DYaw)
+  DRoll = AngularVelocity.z
+ 
+  CoM = I:GetConstructCenterOfMass()
+  Alt = CoM.y
+  ForwardV = I:GetConstructForwardVector()
+end
+ 
+function sign(x)
+  return x>0 and 1 or x<0 and -1 or 0
+end
+ 
+function GetModifiedAzimuth(Azimuth, Offset)
+  local Azimuth = Azimuth-(UsePreferredSide and 1 or sign(Azimuth))*Offset
+  if math.abs(Azimuth)>180 then return Azimuth-sign(Azimuth)*360 end
+  return Azimuth
+end
+ 
+-- returns true if we are yawing, false if we are rolling
+function TurnTowardsAzimuth(I, Azimuth, Offset, DesiredAltitude, RTolerance, Flock)
+  Azimuth = GetModifiedAzimuth(Azimuth, Offset)
+  if Flock>0 then Azimuth=Flocking(I,Azimuth,Flock>1) end
+  if (VTPower[4]==0 and math.abs(Azimuth) > AngleBeforeRoll-Offset) then -- roll to turn
+    RollTowardsAzimuth(I,Azimuth,DesiredAltitude,RTolerance)
+    YawTowardsAzimuth(I,Azimuth)
+    state = "rolling"
+    return false
+  end -- yaw to turn
+  AdjustRollToAngle(I, 0)
+  state = "yawing"
+  YawTowardsAzimuth(I,Azimuth)
+  return true
+end
+ 
+-- Try to roll the craft and pull up on pitch controls to face a given azimuth (relative to the vehicles facing)
+-- Will try to set roll angle at one that will maintain a given altitude
+function RollTowardsAzimuth(I,Azimuth,DesiredAltitude,Tolerance)
+-- depending on our altitude, RollAngle will be set to 90 +/- 40 degrees to climb or descend as appropriate
+  RollAngle = sign(Azimuth)*math.min(MaxRollAngle, 90+limiter((Alt-DesiredAltitude)*.66, 30))
+ 
+  AdjustRollToAngle(I,RollAngle)
+ 
+  if (sign(Roll)==sign(Azimuth) and Roll >= RollAngle-Tolerance and Roll <= RollAngle+Tolerance) then -- start pitching
+    Control(I, DRIVEUP,1,0)
+  end
+end
+ 
+-- Roll the vehicle to a specified roll angle
+function AdjustRollToAngle(I,Angle)
+  local RollSpeedCheck = math.abs(Angle-Roll)/RollDamping
+  if (Roll < Angle) then
+    Control(I, ROLLLEFT,RollSpeedCheck,DRoll)
+  elseif (Roll > Angle) then
+    Control(I, ROLLRIGHT,RollSpeedCheck,-DRoll)
+  end
+  --I:LogToHud(string.format("%.2f %.2f %.2f %.2f", Angle, Roll, RollSpeedCheck, DRoll))
+end
+ 
+-- transform an absolute azimuth into one relative to the nose of the vehicle
+function GetRelativeAzimuth(AbsAzimuth)
+  local Azimuth = math.abs(Yaw-AbsAzimuth)
+  if (Azimuth>180) then Azimuth = 360-Azimuth end
+  if (Yaw>AbsAzimuth) then return Azimuth end
+  return -Azimuth
+end
+     
+-- Yaw the vehicle towards a given aziumth (relative to the vehicle's facing)
+function YawTowardsAzimuth(I,Azimuth)
+  if (math.abs(Roll)<30) then
+    local YawSpeedCheck = math.abs(Azimuth)/YawDamping
+    if (Azimuth > 0) then
+      Control(I, DRIVELEFT,YawSpeedCheck,-DYaw)
+    elseif (Azimuth < 0) then
+      Control(I, DRIVERIGHT,YawSpeedCheck,DYaw)
+    end
+    return true
+  end
+  return false
+end
+ 
+-- No enemies, just cruise along
+function Cruise(I)
+  if OrbitSpawn and I:GetNumberOfMainframes()>0 then
+    SpawnInfo = I:GetTargetPositionInfoForPosition(0, SpawnPos.x, 0, SpawnPos.z)
+    NavigateToPoint(I, false, SpawnInfo)
+  else
+    if I:GetNumberOfMainframes()==0 then
+      I:LogToHud("No AI mainframe found; please add one!")
+    end
+    state = "cruise"
+    AdjustAltitude(I,false,nil,0)
+    AdjustRollToAngle(I, 0)
+    SetSpeed(I, CruiseSpeed)
+    NextAttackTime = I:GetTime()+ForceAttackTime
+  end
+end
+ 
+-- Given the current velocity vector and an azimuth, get the expected terrain height in that direction
+function GetTerrainAltitude(I, VelocityV, Angle)
+  local TerrainAltitude = -999
+  for i,Lookahead in ipairs(TerrainLookahead) do
+    Position = CoM + Quaternion.Euler(0,Angle,0) * VelocityV * Lookahead
+    TerrainAltitude = math.max(TerrainAltitude,I:GetTerrainAltitudeForPosition(Position))
+  end
+  return TerrainAltitude
+end
+ 
+-- Adjust a given altitude to compensate for terrain, according to "TerrainAvoidanceStrategy"
+-- and other terrain-avoidance-specific parameters.
+-- Last parameter forces the use of "TerrainAvoidanceStrategy" 2
+-- returns new altitude that should be used
+function AdjustAltitudeForTerrain(I, Altitude, StrategyOverride)
+  VelocityV = I:GetVelocityVector()
+  TerrainAltitude = math.max(GetTerrainAltitude(I, VelocityV, 0),GetTerrainAltitude(I, VelocityV, 30),GetTerrainAltitude(I, VelocityV, -30))
+ 
+  OverTerrain = false
+  if (TerrainAltitude + MinAltitude > Altitude or TerrainAltitude>0) then -- we'll need to avoid the terrain
+    OverTerrain = TerrainAltitude + MinAltitude > Altitude
+   
+    if(StrategyOverride or TerrainAvoidanceStrategy == 2) then -- don't change altitude unless needed
+      Altitude = math.max(Altitude, TerrainAltitude + MinAltitude)
+    elseif(TerrainAvoidanceStrategy == 1) then -- just add Altitude to terrain height
+      Altitude = math.max(math.min(TerrainAltitude+Altitude, MaxAltitude), TerrainAltitude + MinAltitude)
+    end
+  end
+ 
+  --I:LogToHud(string.format("TA: %.2f Here: %.2f Alt: %.2f", TerrainAltitude, I:GetTerrainAltitudeForLocalPosition(0, 0, 0), Altitude))
+ 
+  return Altitude
+end
+ 
+function GetIntercept(I, Pos)
+  local mySpeed = I:GetVelocityMagnitude()
+  local TTT = FindConvergence(I, Pos.Position, Pos.Velocity, CoM, mySpeed, mySpeed*.75)
+  local Prediction = Pos.Position + Pos.Velocity * TTT
+  return TTT, I:GetTargetPositionInfoForPosition(0, Prediction.x, Prediction.y, Prediction.z).Azimuth, Prediction.y
+end
+ 
+-- Perform a water start check. Returns true if movement is permitted.
+function WaterStartCheck(I)
+  if (Alt < DeployAlt) then
+    I:Component_SetBoolLogicAll(0, true)
+    WaterStarted = true
+  elseif (WaterStarted and Alt > ReleaseAlt) then
+    I:Component_SetBoolLogicAll(0, false)
+    WaterStarted = false
+  end
+ 
+  if (not WaterStarted or Alt>=EnableEnginesAlt) then
+    return true
+  end
+  return false
+end
+ 
+function SetSpeed(I, Speed)
+  if (I:GetVelocityMagnitude()>MaximumSpeed) then Speed=1
+  elseif (I:GetVelocityMagnitude()<MinimumSpeed) then Speed=5 end
+  if MainDriveControlType==1 then
+    I:RequestThrustControl(0,Speed/5)
+  elseif MainDriveControlType==2 then
+    I:RequestControl(MODE,DRIVEMAIN,5)
+    for k, v in pairs(Main) do I:Component_SetFloatLogic(9,v,Speed/5) end
+  else
+    I:RequestControl(MODE,DRIVEMAIN,Speed)
+  end
+end
+ 
+function limiter(p,l)
+  return math.min(l,math.max(-l,p))
+end
+ 
+function Control(I, Type, SpeedCheck, Delta)
+  local DoFType = math.floor(Type/2)+1
+  if (SpeedCheck>Delta) then
+    I:RequestControl(MODE, Type, 1)
+    DriveDesc[DoFType] = DriveTypeDesc[Type+1]
+  end
+  VTPower[DoFType] = (Type%2*2-1)*limiter(SpeedCheck*VTProportional[DoFType]-Delta*VTDelta[DoFType],1)
+end
+ 
+function ComputeSpinners(Rotation, Spinners, Axis)
+  for Spinner,Dir in pairs(Spinners) do
+    Rotation[Spinner] = Rotation[Spinner] + Dir*VTPower[Axis]*MaxVTAngle[Axis]
+  end
+end
+ 
+function ComputeEngines(DriveFraction, Engines, Axis)
+  for Engine,Dir in pairs(Engines) do
+    if Dir==sign(VTPower[Axis]) then
+      DriveFraction[Engine] = DriveFraction[Engine]*(1-math.abs(VTPower[Axis]))
+    end
+  end
+end
+ 
+function VectorEngines(I)
+  local RL,RR,RY = 0,0,0
+ 
+  local Rotation = {}
+  for k,v in pairs(AllSpinners) do Rotation[v] = 0 end
+ 
+  if (state=="rolling" and VTPower[3]>0) then
+    VTPower[3]=0
+  end
+  ComputeSpinners(Rotation, YawSpinners, 1)
+  ComputeSpinners(Rotation, RollSpinners, 2)
+  ComputeSpinners(Rotation, PitchSpinners, 3)
+  if (VTOLEngines and VTPower[4]~=0) then -- VTOL Mode
+    for Spinner,Dir in pairs(DownSpinners) do Rotation[Spinner] = Dir*MaxVTAngle[4] end
+  else
+    ComputeSpinners(Rotation, DownSpinners, 4)
+  end
+ 
+  RotateSpinnersTo(I,Rotation)
+ 
+  --I:LogToHud(string.format("Y: %.02f R: %.02f P: %.02f", VTPower[1], VTPower[2], VTPower[3]))
+end
+ 
+function ClassifySpinner(I,p)
+  if VTSpinners=='all' and ExcludedSpinners[p] then return end
+  local info = I:GetSpinnerInfo(p)
+  local h,a,b = EulerAngles(info.LocalRotation)
+  local pos = info.LocalPositionRelativeToCom
+  SpinnerStartRotations[p]=info.LocalRotation
+  a=math.floor(a+.5)
+  b=math.floor(b+.5)
+  if (a==0 and b==0) then
+    tinsert(pos.z,YawSpinners,1,-1,p)
+    AddSpinner(pos.y,-1,p)
+  elseif (a==0 and math.abs(b)>170) then
+    tinsert(pos.z,YawSpinners,-1,1,p)
+    AddSpinner(pos.y,1,p)
+  else
+    local h,a,b = EulerAngles(info.LocalRotation*Quaternion.Euler(0, 0, 90))
+    h=math.floor(h+.5)
+    a=math.floor(a+.5)
+    if (h==0 and a==0) then -- pointed right
+      tinsert(pos.z,PitchSpinners,1,-1,p)
+      if VTOLSpinners=='all' and ExcludedSpinners[p] then tinsert(pos.z,DownSpinners,-1,-1,p) end
+      AddSpinner(pos.x,-1,p)
+    elseif (a==0 and math.abs(h)>170) then -- pointed left
+      tinsert(pos.z,PitchSpinners,-1,1,p)
+      if VTOLSpinners=='all' and ExcludedSpinners[p] then tinsert(pos.z,DownSpinners,1,1,p) end
+      AddSpinner(pos.x,1,p)
+    end
+  end
+end
+ 
+function ClassifyVTOLSpinner(I,p)
+  local info = I:GetSpinnerInfo(p)
+  local h,a,b = EulerAngles(info.LocalRotation*Quaternion.Euler(0, 0, 90))
+  local pos = info.LocalPositionRelativeToCom
+  h=math.floor(h+.5)
+  a=math.floor(a+.5)
+  --I:Log(string.format("Spinner: %d Orientation: (%.2f, %.2f, %.2f) Position: (%.2f, %.2f, %.2f)", p, h, a, b, pos.x, pos.y, pos.z))
+  if (h==0 and a==0) then
+    tinsert(pos.z,DownSpinners,-1,-1,p)
+  elseif (a==0 and math.abs(h)>170) then
+    tinsert(pos.z,DownSpinners,1,1,p)
+  end
+end
+ 
+function GetPosRelativeToCoM(pos)
+  local rot = Quaternion.Inverse(Quaternion.LookRotation(ForwardV))
+  local rpos = rot*(pos-CoM)
+  for i, p in ipairs(rpos) do rpos[i]=math.floor(p*10+.5)/10 end
+  return rpos
+end
+ 
+function ClassifyEngine(I,p,force)
+  local info = I:Component_GetBlockInfo(9,p)
+  if (force or info.LocalForwards.y==1) then
+    pos = GetPosRelativeToCoM(info.Position)
+    EngineDF[p] = I:Component_GetFloatLogic(9,p)
+    tinsert(pos.z,PitchEngines,1,-1,p)
+    if pos.x<-1.1 then  -- on left
+      tinsert(pos.z,RollEngines,-1,-1,p)
+    elseif pos.x>1.1 then -- on right
+      tinsert(pos.z,RollEngines,1,1,p)
+    end
+  end
+end
+ 
+function AddSpinner(comp,dir,p)
+  if comp<-1 then  -- on left
+    RollSpinners[p] = dir
+  elseif comp>1 then -- on right
+    RollSpinners[p] = -dir
+  end
+  table.insert(AllSpinners,p)
+end
+     
+function tinsert(z,s,x,y,p)
+  s[p] = z>0 and x or y
+end
+     
+function EulerAngles(q1)
+  local sqw = q1.w*q1.w
+  local sqx = q1.x*q1.x
+  local sqy = q1.y*q1.y
+  local sqz = q1.z*q1.z
+  local unit = sqx + sqy + sqz + sqw --if normalised is one, otherwise is correction factor
+  local test = q1.x*q1.y + q1.z*q1.w
+  local heading, attitude, bank
+  if (test > 0.499*unit) then --singularity at north pole
+    heading = 2 * math.atan2(q1.x,q1.w)
+    attitude = math.pi/2;
+    bank = 0
+  elseif (test < -0.499*unit) then --singularity at south pole
+    heading = -2 * math.atan2(q1.x,q1.w)
+    attitude = -math.pi/2
+    bank = 0
+  else
+    heading = math.atan2(2*q1.y*q1.w-2*q1.x*q1.z , sqx - sqy - sqz + sqw)
+    attitude = math.asin(2*test/unit)
+    bank = math.atan2(2*q1.x*q1.w-2*q1.y*q1.z , -sqx + sqy - sqz + sqw)
+  end
+  return math.deg(heading), math.deg(attitude), math.deg(bank)
+end
+ 
+function RotateSpinnersTo(I, Spinners)
+  for Spinner, NewAngle in pairs(Spinners) do
+    local Angle = EulerAngles(Quaternion.Inverse(SpinnerStartRotations[Spinner]) * I:GetSpinnerInfo(Spinner).LocalRotation)
+    local DeflectAngle = limiter(limiter(NewAngle,90)-Angle,43)
+    if math.abs(DeflectAngle)<2 then DeflectAngle=0 end
+    I:SetSpinnerContinuousSpeed(Spinner,DeflectAngle*30/43)
+  end
+end
+ 
+function FindConvergence(I, tPos, tVel, wPos, wSpeed, minConv)
+   local relativePosition = wPos - tPos
+   local distance = Vector3.Magnitude(relativePosition)
+   local targetAngle = I:Maths_AngleBetweenVectors(relativePosition, tVel)
+   local tSpeed = Vector3.Magnitude(tVel)
+ 
+   local a = tSpeed^2 - wSpeed^2
+   local b = -2 * tSpeed * distance * math.cos(math.rad(targetAngle))
+   local c = distance^2
+   local det = math.sqrt(b^2-4*a*c)
+   local ttt = distance / minConv
+ 
+   if det > 0 then
+      local root1 = math.min((-b + det)/(2*a), (-b - det)/(2*a))
+      local root2 = math.max((-b + det)/(2*a), (-b - det)/(2*a))
+      ttt = (root1 > 0 and root1) or (root2 > 0 and root2) or ttt
+   end
+   return ttt
+end
+ 
+function CheckMissileWarnings(I)
+  if WarningMainframe<0 then return 0 end
+ 
+  local NumWarnings = I:GetNumberOfWarnings(WarningMainframe)
+  local MinTTT = math.max(RunAwayTTT,DodgeTTT)
+  local MinWarning
+  local OwnVelocity = ForwardV * math.max(NormalSpeed, I:GetVelocityMagnitude())
+ 
+  for w = 0, NumWarnings - 1 do
+    local Warning = I:GetMissileWarning(WarningMainframe, w)
+    if Warning.Valid and I:Maths_AngleBetweenVectors(Warning.Velocity, CoM - Warning.Position) < 90 then
+      local mSpeed = Vector3.Magnitude(Warning.Velocity)
+      local TTT = FindConvergence(I, CoM, OwnVelocity, Warning.Position, mSpeed, mSpeed*.75)
+      local PredictedPosition = CoM + OwnVelocity * TTT
+      local Orthogonal = (Warning.Position + Vector3.Normalize(Warning.Velocity)
+                         * Vector3.Distance(Warning.Position, PredictedPosition)
+                         * math.cos(math.rad(I:Maths_AngleBetweenVectors(Warning.Velocity, PredictedPosition - Warning.Position))))
+                         - PredictedPosition
+      local AdjustedPosition = PredictedPosition + Vector3.ClampMagnitude(Orthogonal, CraftRadius)
+      local Radius = (Vector3.Distance(Warning.Position, AdjustedPosition) / 2)
+                     / math.cos(math.rad(I:Maths_AngleBetweenVectors(Warning.Velocity, AdjustedPosition - Warning.Position) - 90))
+      if TTT < MinTTT and Radius > DangerRadius then
+        MinTTT = TTT
+        MinWarning = Warning
+      end
+    end
+  end
+ 
+  if (MinTTT < math.max(RunAwayTTT,DodgeTTT)) then
+    local AdjustedPosition = CoM + OwnVelocity * math.min(MinTTT,0.75)
+    local ApproachAngle=I:Maths_AngleBetweenVectors(MinWarning.Velocity, AdjustedPosition - MinWarning.Position)
+    if (MinTTT < DodgeTTT) then
+      if (math.abs(MinWarning.Azimuth) < 10 or math.abs(MinWarning.Azimuth) > 170) then
+        return sign(Roll)*120
+      end
+     
+      local Orthogonal = (MinWarning.Position + Vector3.Normalize(MinWarning.Velocity)
+                         * Vector3.Distance(MinWarning.Position, AdjustedPosition)
+                         * math.cos(math.rad(ApproachAngle))) - AdjustedPosition
+      local Objective = I:GetConstructPosition() - Orthogonal
+      return I:GetTargetPositionInfoForPosition(0, Objective.x, Objective.y, Objective.z).Azimuth
+    end
+    local Angle=MinWarning.Azimuth>0 and RunAngle or -RunAngle
+    local Objective = I:GetConstructPosition()+Quaternion.Euler(0,Angle,0)*(MinWarning.Position-CoM)
+    return I:GetTargetPositionInfoForPosition(0, Objective.x, 0, Objective.z).Azimuth
+  end
+  return 0
+end
+ 
+function ClassifyEngines(I)
+  if NumEngines==I:Component_GetCount(9) then return end
+  NumEngines=I:Component_GetCount(9)
+ 
+  Main={} -- try to figure out which drives are pointed backwards
+  for p = 0, NumEngines - 1 do
+    local info=I:Component_GetBlockInfo(9,p)
+    if (info.LocalForwards.z==1 and GetPosRelativeToCoM(info.Position)==info.LocalPositionRelativeToCom) then
+      table.insert(Main,p)
+    end
+  end
+ 
+  if VTOLEngines=='all' then
+    for p = 0, NumEngines - 1 do ClassifyEngine(I,p,false) end
+  end
+end
+ 
+function ClassifySpinners(I)
+  if NumSpinners==I:GetSpinnerCount() then return end
+  NumSpinners=I:GetSpinnerCount()
+ 
+  if VTSpinners=='all' then
+    for p = 0, NumSpinners - 1 do ClassifySpinner(I,p) end
+  end
+end
+ 
+function NameMatches(Name)
+  if FlockWithBlueprintNames=='all' then return true end
+  for k,v in pairs(FlockWithBlueprintNames) do
+    if v==string.sub(Name,1,string.len(v)) then return true end
+  end
+  return false
+end
+ 
+function Flocking(I, Azimuth, Escaping)
+  if NeighborRadius==0 then return Azimuth end
+ 
+  local FCount = I:GetFriendlyCount()
+  local A = Vector3(0,0,0)
+  local C,S,J,L,E = A,A,A,A,A
+  local Near,Aligning,Injured,Far,Terrain=0,0,0,0,0
+  for f = 0, FCount-1 do
+    local FInfo = I:GetFriendlyInfo(f)
+    if FInfo.Valid then
+      local Dist=FInfo.CenterOfMass-CoM
+      if Dist.magnitude<NeighborRadius then
+        if FInfo.Velocity.magnitude>=IgnoreBelowSpeed and NameMatches(FInfo.BlueprintName) then
+          A=A+FInfo.Velocity  -- Alignment
+          C=C+FInfo.CenterOfMass -- Cohesion
+          J=J+FInfo.CenterOfMass*(1-FInfo.HealthFraction) -- Injured cohesion
+          Aligning=Aligning+1
+          Injured=Injured+(1-FInfo.HealthFraction)
+        end
+        S=S+Dist -- Separation
+        Near=Near+1
+      elseif FInfo.Velocity.magnitude>=IgnoreBelowSpeed and NameMatches(FInfo.BlueprintName) then
+        L=L+FInfo.CenterOfMass -- Long-range cohesion
+        Far=Far+1
+      end
+    end
+  end
+ 
+  if TerrainAvoidanceWeight~=0 then
+    local ForwardV = Vector3.forward * NeighborRadius
+    local Angles = {0,45,90,135,180,225,270,315}
+    for k, a in pairs(Angles) do
+      local Position = CoM + Quaternion.Euler(0,a,0) * ForwardV
+      local TerrainAltitude = I:GetTerrainAltitudeForPosition(Position)
+      if (TerrainAltitude + MinAltitude > Alt) then
+        local Dist=Position-CoM
+        E=E+Dist*(1 + math.min(50,TerrainAltitude + MinAltitude - Alt)*.02)
+        Terrain=Terrain+1
+      end
+    end
+    if Terrain>0 then E=(-E/Terrain).normalized*TerrainAvoidanceWeight end
+  end
+ 
+  if I:GetNumberOfMainframes() > 0 then
+    local ECount = I:GetNumberOfTargets(0)
+    for e = 1, ECount-1 do
+      local EInfo = I:GetTargetPositionInfo(0,e)
+      if EInfo.Valid then
+        local Dist=EInfo.Position-CoM
+        if Dist.magnitude<NeighborRadius and math.abs(EInfo.Position.y-Alt)<CollisionDetectionHeight then
+          S=S+Dist -- Separation
+          Near=Near+1
+        end
+      end
+    end
+  end
+ 
+  if Near+Far+Terrain==0 then return Azimuth end
+  if Aligning>0 then
+    A=(A/Aligning).normalized*AlignmentWeight
+    C=(C/Aligning-CoM).normalized*CohesionWeight
+  end
+  if Injured>0 then J=(J/Injured-CoM).normalized*InjuredWeight end
+  if Far>0 then L=(L/Far-CoM).normalized*LongRangeWeight end
+  if Near>0 then S=(-S/Near).normalized*SeparationWeight end
+ 
+  local T=Quaternion.Euler(0,Yaw-Azimuth,0)*Vector3.forward*TargetWeight*(Escaping and 0 or 1)
+  local Objective = I:GetConstructPosition()+A+C+S+J+L+E+T
+  return I:GetTargetPositionInfoForPosition(0, Objective.x, 0, Objective.z).Azimuth
+end
+ 
+-- given information about a target, navigates to it
+function NavigateToPoint(I, Engaged, Pos)
+  Speed = EscapeSpeed
+  local DodgeAngle = CheckMissileWarnings(I)
+  local CollisionTTT, CollisionAzimuth, CollisionAlt = GetIntercept(I, Pos)
+  local DesiredAltitude = AdjustAltitude(I,Engaged,Pos,CollisionAlt)
+ 
+  if (DodgeAngle~=0) then -- dodge missiles!
+    TurnTowardsAzimuth(I, DodgeAngle, 0, DesiredAltitude, DodgingRollTolerance, 0)
+    Speed = DodgingSpeed
+    state = "dodging"
+    onattackrun = true
+  elseif (Engaged and CollisionTTT<CollisionTThreshold and
+          (math.abs(Pos.AltitudeAboveSeaLevel-Alt)<CollisionDetectionHeight or
+           math.abs(CollisionAlt-Alt)<CollisionDetectionHeight) and
+           math.abs(CollisionAzimuth)<CollisionAngle) then
+    TurnTowardsAzimuth(I, CollisionAzimuth, CollisionAngle, DesiredAltitude, DodgingRollTolerance, 0)
+    Speed = DodgingSpeed
+    state = "collision"
+    onattackrun = true
+  elseif (Pos.GroundDistance > ClosingDistance) then
+    Speed = TurnTowardsAzimuth(I, CollisionAzimuth, 0, DesiredAltitude, RollTolerance, 1) and ClosingSpeed or RollingSpeed
+    state = "closing"
+    onattackrun = true
+  elseif onattackrun then
+    local Azimuth = UsePredictiveGuidance and CollisionAzimuth or Pos.Azimuth
+    Speed = TurnTowardsAzimuth(I, Azimuth, AngleBeforeTurn, DesiredAltitude, RollTolerance, 1) and AttackRunSpeed or RollingSpeed
+    if (Pos.GroundDistance < AbortRunDistance) then
+      onattackrun = false
+      NextAttackTime = I:GetTime()+ForceAttackTime
+      EscapeAngle = GetModifiedAzimuth(Yaw-Azimuth, AngleOfEscape)
+    end
+  else -- not on attack run, just go forwards until we're out of range
+    TurnTowardsAzimuth(I, GetRelativeAzimuth(EscapeAngle), 0, DesiredAltitude, RollTolerance, 2)
+    state = "escaping"
+    onattackrun = Pos.GroundDistance > AttackRunDistance or I:GetTime()>NextAttackTime
+  end
+ 
+  if OverTerrain then
+    Speed = math.min(Speed,MaxTerrainSpeed)
+  end
+  if not Engaged then
+    Speed = math.min(Speed,CruiseSpeed)
+  end
+  SetSpeed(I, Speed)
+end
+ 
+-- Calculate all movement for the vehicle
+function Movement(I)
+  if firstpass then
+    firstpass = false
+    SpawnPos = CoM
+    EscapeAngle = Yaw
+    if type(AltitudeOffset) == "table" then
+      math.randomseed(I:GetTime()+CoM.x+CoM.y+CoM.z)
+      AltitudeOffset=math.floor(math.random()*(AltitudeOffset[2]-AltitudeOffset[1])+AltitudeOffset[1])
+      I:Log("AltitudeOffset: "..AltitudeOffset)
+    end
+    CruiseAltitude = CruiseAltitude+AltitudeOffset
+    MaxAltitude = MaxAltitude+AltitudeOffset
+    MatchAltitudeOffset = MatchAltitudeOffset+AltitudeOffset
+    MinMatchingAltitude = MinMatchingAltitude+AltitudeOffset
+ 
+    if type(VTOLEngines) == "table" then
+      for k, p in pairs(VTOLEngines) do ClassifyEngine(I,p,true) end
+    end
+ 
+    if type(VTSpinners) == "table" then
+      local Used = {}
+      for k, p in pairs(VTSpinners) do
+        ClassifySpinner(I,p)
+        Used[p]=true
+      end
+      for p = 0, I:GetSpinnerCount()-1 do
+        if not Used[p] then table.insert(HeliSpinners,p) end
+      end
+    end
+    if type(VTOLSpinners) == "table" then
+      for k, p in pairs(VTOLSpinners) do ClassifyVTOLSpinner(I,p) end
+    end
+    if ExcludeSpinners then
+      for k, p in pairs(ExcludeSpinners) do ExcludedSpinners[p]=true end
+    end
+  end
+  ClassifyEngines(I)
+  ClassifySpinners(I)
+ 
+  DriveDesc = {'','','',''}
+  VTPower = {0,0,0,0} -- yaw, roll, pitch, VTOL
+   
+  if (I:GetNumberOfMainframes() > 0 and I:GetNumberOfTargets(0) > 0) then
+    local TargetPos = I:GetTargetPositionInfo(0,0)
+    if TargetPos.Valid then
+      NavigateToPoint(I, true, TargetPos)
+    else
+      Cruise(I)
+    end
+  else
+    Cruise(I)
+  end
+ 
+  if VTSpinners then VectorEngines(I) end
+  if VTOLEngines then ControlVTOLPower(I) end
+ 
+  if DebugMode then
+    --I:LogToHud(string.format("%.2f %.2f", DPitch, math.abs(Roll)))
+    I:LogToHud(string.format("%s %s %s %s %d", state, DriveDesc[1], DriveDesc[2], DriveDesc[3], Speed))
+    --I:Log(string.format("Y:%.2f R:%.2f P:%.2f", Yaw, Roll, Pitch))
+  end
+end
+ 
+-- Main update function. Everything starts here.
+function Update(I)
+  GetAngleStats(I)
+  if  not I:IsDocked() and WaterStartCheck(I) then
+    Movement(I)
+  else
+    for p = 0, I:GetSpinnerCount()-1 do I:SetSpinnerRotationAngle(p,0) end
+  end
+end
+--

@@ -1,0 +1,526 @@
+{
+  "PersistentInfoStore": [
+    {
+      "Header": {
+        "Id": {
+          "Id": 695751387
+        },
+        "Type": 1
+      },
+      "PriorPerformance": {
+        "Completed": true,
+        "FastestTime": 109.229362,
+        "CheapestRun": 28705.0,
+        "HighestScore": 64.80989,
+        "Playthroughs": 1
+      },
+      "PlayerSetup": {
+        "ResourcesBought": {
+          "Natural": 0.0,
+          "Metal": 0.0,
+          "Oil": 0.0,
+          "Scrap": 0.0,
+          "Crystal": 0.0
+        },
+        "SpawnPointSelection": {
+          "Id": -1
+        }
+      },
+      "ForceUsageList": [
+        {
+          "ForceId": {
+            "Id": 1236659043
+          },
+          "FilePath": null,
+          "Name": "Javelin",
+          "Usage": 0
+        },
+        {
+          "ForceId": {
+            "Id": 1284083736
+          },
+          "FilePath": null,
+          "Name": "Ocelot",
+          "Usage": 0
+        },
+        {
+          "ForceId": {
+            "Id": 1955795313
+          },
+          "FilePath": null,
+          "Name": "Duster",
+          "Usage": 0
+        },
+        {
+          "ForceId": {
+            "Id": 833204278
+          },
+          "FilePath": null,
+          "Name": "Duster",
+          "Usage": 0
+        }
+      ]
+    },
+    {
+      "Header": {
+        "Id": {
+          "Id": 1960925147
+        },
+        "Type": 1
+      },
+      "PriorPerformance": {
+        "Completed": false,
+        "FastestTime": -1.0,
+        "CheapestRun": -1.0,
+        "HighestScore": -1.0,
+        "Playthroughs": 0
+      },
+      "PlayerSetup": {
+        "ResourcesBought": {
+          "Natural": 0.0,
+          "Metal": 0.0,
+          "Oil": 0.0,
+          "Scrap": 0.0,
+          "Crystal": 0.0
+        },
+        "SpawnPointSelection": {
+          "Id": 2082529185
+        }
+      },
+      "ForceUsageList": [
+        {
+          "ForceId": {
+            "Id": 1864079425
+          },
+          "FilePath": "/Users/JO2/From The Depths/Player Profiles/AdiposeExpress/Constructables/Mini AI Fleet/Cannon_basic_wood.blueprint",
+          "Name": "Cannon_basic_wood",
+          "Usage": 2
+        },
+        {
+          "ForceId": {
+            "Id": 616430656
+          },
+          "FilePath": null,
+          "Name": "Duster",
+          "Usage": 0
+        }
+      ]
+    },
+    {
+      "Header": {
+        "Id": {
+          "Id": 1470025054
+        },
+        "Type": 1
+      },
+      "PriorPerformance": {
+        "Completed": false,
+        "FastestTime": -1.0,
+        "CheapestRun": -1.0,
+        "HighestScore": -1.0,
+        "Playthroughs": 0
+      },
+      "PlayerSetup": {
+        "ResourcesBought": {
+          "Natural": 0.0,
+          "Metal": 0.0,
+          "Oil": 0.0,
+          "Scrap": 0.0,
+          "Crystal": 0.0
+        },
+        "SpawnPointSelection": {
+          "Id": -1
+        }
+      },
+      "ForceUsageList": [
+        {
+          "ForceId": {
+            "Id": 862967583
+          },
+          "FilePath": null,
+          "Name": "Scrap Platform 11B",
+          "Usage": 0
+        },
+        {
+          "ForceId": {
+            "Id": 913992880
+          },
+          "FilePath": null,
+          "Name": "Scrap Platform 11B",
+          "Usage": 0
+        }
+      ]
+    },
+    {
+      "Header": {
+        "Id": {
+          "Id": 1871410763
+        },
+        "Type": 1
+      },
+      "PriorPerformance": {
+        "Completed": false,
+        "FastestTime": -1.0,
+        "CheapestRun": -1.0,
+        "HighestScore": -1.0,
+        "Playthroughs": 0
+      },
+      "PlayerSetup": {
+        "ResourcesBought": {
+          "Natural": 0.0,
+          "Metal": 0.0,
+          "Oil": 0.0,
+          "Scrap": 0.0,
+          "Crystal": 0.0
+        },
+        "SpawnPointSelection": {
+          "Id": -1
+        }
+      },
+      "ForceUsageList": [
+        {
+          "ForceId": {
+            "Id": 979732784
+          },
+          "FilePath": null,
+          "Name": "Hammer",
+          "Usage": 0
+        },
+        {
+          "ForceId": {
+            "Id": 1355107316
+          },
+          "FilePath": null,
+          "Name": "Steel Warden",
+          "Usage": 0
+        },
+        {
+          "ForceId": {
+            "Id": 1839310461
+          },
+          "FilePath": null,
+          "Name": "Hornet",
+          "Usage": 0
+        }
+      ]
+    },
+    {
+      "Header": {
+        "Id": {
+          "Id": 376504912
+        },
+        "Type": 1
+      },
+      "PriorPerformance": {
+        "Completed": false,
+        "FastestTime": -1.0,
+        "CheapestRun": -1.0,
+        "HighestScore": -1.0,
+        "Playthroughs": 0
+      },
+      "PlayerSetup": {
+        "ResourcesBought": {
+          "Natural": 0.0,
+          "Metal": 0.0,
+          "Oil": 0.0,
+          "Scrap": 0.0,
+          "Crystal": 0.0
+        },
+        "SpawnPointSelection": {
+          "Id": -1
+        }
+      },
+      "ForceUsageList": [
+        {
+          "ForceId": {
+            "Id": 1301120979
+          },
+          "FilePath": null,
+          "Name": "The Flayed Soul",
+          "Usage": 0
+        }
+      ]
+    },
+    {
+      "Header": {
+        "Id": {
+          "Id": 1129895817
+        },
+        "Type": 1
+      },
+      "PriorPerformance": {
+        "Completed": false,
+        "FastestTime": -1.0,
+        "CheapestRun": -1.0,
+        "HighestScore": -1.0,
+        "Playthroughs": 0
+      },
+      "PlayerSetup": {
+        "ResourcesBought": {
+          "Natural": 0.0,
+          "Metal": 0.0,
+          "Oil": 0.0,
+          "Scrap": 0.0,
+          "Crystal": 0.0
+        },
+        "SpawnPointSelection": {
+          "Id": -1
+        }
+      },
+      "ForceUsageList": [
+        {
+          "ForceId": {
+            "Id": 1803148652
+          },
+          "FilePath": null,
+          "Name": "Foundry",
+          "Usage": 0
+        },
+        {
+          "ForceId": {
+            "Id": 1657727128
+          },
+          "FilePath": null,
+          "Name": "Sharktooth",
+          "Usage": 0
+        },
+        {
+          "ForceId": {
+            "Id": 1875936064
+          },
+          "FilePath": null,
+          "Name": "Sneek",
+          "Usage": 0
+        }
+      ]
+    },
+    {
+      "Header": {
+        "Id": {
+          "Id": 205303815
+        },
+        "Type": 1
+      },
+      "PriorPerformance": {
+        "Completed": false,
+        "FastestTime": -1.0,
+        "CheapestRun": -1.0,
+        "HighestScore": -1.0,
+        "Playthroughs": 0
+      },
+      "PlayerSetup": {
+        "ResourcesBought": {
+          "Natural": 0.0,
+          "Metal": 0.0,
+          "Oil": 0.0,
+          "Scrap": 0.0,
+          "Crystal": 0.0
+        },
+        "SpawnPointSelection": {
+          "Id": -1
+        }
+      },
+      "ForceUsageList": [
+        {
+          "ForceId": {
+            "Id": 2112199156
+          },
+          "FilePath": null,
+          "Name": "Conduit",
+          "Usage": 0
+        },
+        {
+          "ForceId": {
+            "Id": 1695977452
+          },
+          "FilePath": null,
+          "Name": "Sapphire",
+          "Usage": 0
+        },
+        {
+          "ForceId": {
+            "Id": 1905437523
+          },
+          "FilePath": null,
+          "Name": "Volta",
+          "Usage": 0
+        },
+        {
+          "ForceId": {
+            "Id": 505248261
+          },
+          "FilePath": null,
+          "Name": "Volta",
+          "Usage": 0
+        },
+        {
+          "ForceId": {
+            "Id": 143800435
+          },
+          "FilePath": null,
+          "Name": "Beluga",
+          "Usage": 0
+        },
+        {
+          "ForceId": {
+            "Id": 1328554673
+          },
+          "FilePath": null,
+          "Name": "Dagger",
+          "Usage": 0
+        }
+      ]
+    },
+    {
+      "Header": {
+        "Id": {
+          "Id": 1670969197
+        },
+        "Type": 1
+      },
+      "PriorPerformance": {
+        "Completed": false,
+        "FastestTime": -1.0,
+        "CheapestRun": -1.0,
+        "HighestScore": -1.0,
+        "Playthroughs": 0
+      },
+      "PlayerSetup": {
+        "ResourcesBought": {
+          "Natural": 0.0,
+          "Metal": 0.0,
+          "Oil": 0.0,
+          "Scrap": 0.0,
+          "Crystal": 0.0
+        },
+        "SpawnPointSelection": {
+          "Id": -1
+        }
+      },
+      "ForceUsageList": [
+        {
+          "ForceId": {
+            "Id": 1705434613
+          },
+          "FilePath": null,
+          "Name": "Pod",
+          "Usage": 0
+        }
+      ]
+    },
+    {
+      "Header": {
+        "Id": {
+          "Id": 1019859457
+        },
+        "Type": 0
+      },
+      "PriorPerformance": {
+        "Completed": false,
+        "FastestTime": -1.0,
+        "CheapestRun": -1.0,
+        "HighestScore": -1.0,
+        "Playthroughs": 0
+      },
+      "PlayerSetup": {
+        "ResourcesBought": {
+          "Natural": 2079254.0,
+          "Metal": 822972.0,
+          "Oil": 3286988.0,
+          "Scrap": 1512036.0,
+          "Crystal": 7217.0
+        },
+        "SpawnPointSelection": {
+          "Id": -1
+        }
+      },
+      "ForceUsageList": [
+        {
+          "ForceId": {
+            "Id": 1010874887
+          },
+          "FilePath": null,
+          "Name": "starting_fortress",
+          "Usage": 0
+        },
+        {
+          "ForceId": {
+            "Id": 1945956160
+          },
+          "FilePath": null,
+          "Name": "starting_rib",
+          "Usage": 0
+        }
+      ]
+    },
+    {
+      "Header": {
+        "Id": {
+          "Id": 1494221088
+        },
+        "Type": 1
+      },
+      "PriorPerformance": {
+        "Completed": false,
+        "FastestTime": -1.0,
+        "CheapestRun": -1.0,
+        "HighestScore": -1.0,
+        "Playthroughs": 0
+      },
+      "PlayerSetup": {
+        "ResourcesBought": {
+          "Natural": 0.0,
+          "Metal": 0.0,
+          "Oil": 0.0,
+          "Scrap": 0.0,
+          "Crystal": 0.0
+        },
+        "SpawnPointSelection": {
+          "Id": -1
+        }
+      },
+      "ForceUsageList": [
+        {
+          "ForceId": {
+            "Id": 813818322
+          },
+          "FilePath": null,
+          "Name": "Coal Factory",
+          "Usage": 0
+        },
+        {
+          "ForceId": {
+            "Id": 322006788
+          },
+          "FilePath": null,
+          "Name": "Anti Air Cannon",
+          "Usage": 0
+        },
+        {
+          "ForceId": {
+            "Id": 201559615
+          },
+          "FilePath": null,
+          "Name": "Unarmed Tower",
+          "Usage": 0
+        },
+        {
+          "ForceId": {
+            "Id": 110234851
+          },
+          "FilePath": null,
+          "Name": "Unarmed Tower",
+          "Usage": 0
+        },
+        {
+          "ForceId": {
+            "Id": 2085090525
+          },
+          "FilePath": null,
+          "Name": "Unarmed Tower",
+          "Usage": 0
+        }
+      ]
+    }
+  ]
+}

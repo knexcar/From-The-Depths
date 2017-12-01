@@ -1,0 +1,3 @@
+function Update(I)
+  I:SetSpinnerContinuousSpeed(0, Mathf.Sin(I:GetTimeSinceSpawn()/1)*0.5);
+end

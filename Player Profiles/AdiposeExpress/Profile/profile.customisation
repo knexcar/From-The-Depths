@@ -1,0 +1,14 @@
+{
+  "FleetColors": [
+    "0,0.35,0.57,0.67",
+    "0,0.76,0.7,0.41",
+    "1,0.38,0.14,0.5",
+    "0,0,0,0"
+  ],
+  "Flags": {
+    "WebSourceLarge": "",
+    "WebSourceSmall": "",
+    "UseOwnFlags": false
+  },
+  "Avatar": 1
+}

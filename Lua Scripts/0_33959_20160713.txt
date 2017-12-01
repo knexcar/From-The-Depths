@@ -1,0 +1,494 @@
+minAlt = 50   -- match at least this with the AI card
+maxAlt = 900
+
+controllingMainframe = 1     --the mainframe with the target prioritization card
+restrictSlot = 1             --ai will only control these weapons, and will orient the craft along those
+
+onlyBomberRun = 0            -- set to 1 for only doing target/break sequences.
+maneuverDistanceFactor = 1   -- increase this if your plane needs more distance between attack run
+
+spaceWhenIdle = 0            --set to 1 if you don't have a AI Plane card
+
+dampening = 50             -- increase to reduce wobbling frequency
+multiplyer = 100              -- apply stronger control
+
+pYaw = 0
+pPitch = 0
+pRoll = 0
+
+function flyAlong(I, direction, normal, seed) 
+    I:RequestThrustControl(0, 1)
+	I:RequestControl(2,8,5)
+	logstr = ""
+	
+	--I:RequestControl(mode,type,drive)
+    eYaw =  Vector3.Dot(
+			Vector3.ProjectOnPlane(direction, I:GetConstructUpVector() ).normalized,
+			I:GetConstructRightVector()
+			) 
+	ePitch = Vector3.Dot(
+			Vector3.ProjectOnPlane(direction, I:GetConstructRightVector() ).normalized,
+			I:GetConstructUpVector()
+			)
+	eRoll = Vector3.Dot(
+			Vector3.ProjectOnPlane(normal, I:GetConstructForwardVector() ).normalized,
+			I:GetConstructRightVector()
+			) 
+	
+	dPitch = ePitch - pPitch
+	dYaw = eYaw - pYaw
+	dRoll = eRoll - pRoll
+	
+	pYaw   = eYaw
+	pPitch = ePitch
+	pRoll  = eRoll
+	
+		
+	CYaw   = multiplyer * eYaw    + dYaw * dampening
+	CPitch = multiplyer * ePitch  + dPitch * dampening
+	CRoll  = multiplyer * eRoll   + dRoll * dampening
+ 
+
+	if (100 * math.abs(CYaw) < seed ) then CYaw = 0 end
+	if (100 * math.abs(CPitch) < seed ) then  CPitch = 0 end
+	if (100 * math.abs(CRoll) < seed ) then CRoll = 0 end 
+	
+	if ( CYaw < 0 ) then
+			--turn left
+			I:RequestControl(2,0,-CYaw)
+			I:RequestControl(2,1,0)
+			logstr = logstr .. " left " .. -CYaw
+	else
+			--turn right
+			I:RequestControl(2,1,CYaw)
+			I:RequestControl(2,0,0)
+			logstr = logstr .. " right " ..CYaw
+	end
+	if ( CPitch < 0 ) then
+			--pitch down
+			I:RequestControl(2,5,-CPitch)
+			I:RequestControl(2,4,0)
+			logstr = logstr .. " down " .. -CPitch
+	else
+	        --pitch up
+			I:RequestControl(2,4,CPitch)
+			I:RequestControl(2,5,0)
+			logstr = logstr .. " up " .. CPitch
+	end		
+			
+	if ( CRoll < 0 ) then
+			--0. roll left
+			logstr = logstr .. " rccw " .. -CRoll
+			I:RequestControl(2,2,-CRoll)
+			I:RequestControl(2,3,0)
+	else
+			-- roll right	
+			I:RequestControl(2,3,CRoll)
+			I:RequestControl(2,2,0)
+			logstr = logstr .. " rcw " .. CRoll
+
+	end
+	--I:LogToHud(logstr)
+end
+
+
+
+
+function killThatThing(I, weaponInfo, targetInfo, weaponIndex, turretSpinnerIndex) 
+
+    P = targetInfo.AimPointPosition
+    V = targetInfo.Velocity
+    WS = weaponInfo.Speed
+    G = I:GetGravityForAltitude(P.y).magnitude
+
+    
+  
+    T = (P - weaponInfo.GlobalPosition).magnitude / (WS*0.85) -- FIRST ESTIMATE OF FUTURE TARGET POSITION
+
+
+    FP = P + V*T  - I:GetVelocityVector()*T
+ -- position the target will be
+  
+    AD = FP - weaponInfo.GlobalPosition
+  -- direction direct to the target
+
+
+
+    PJ = Mathf.Sqrt(AD.x*AD.x + AD.z*AD.z)
+ -- horizontal distance to the target
+
+   
+    S2 = WS*WS
+  -- speed^2
+    S4 = S2*WS*WS
+  -- speed^4 (need these many times)
+    DELTA = S4 - G*(G*PJ*PJ + 2*AD.y * S2)
+ -- is there a solution to the parable?
+     
+
+    if ( DELTA > 0 ) then
+        --ok we can reach it and now we have a better estimate
+        
+        AG = Mathf.Atan2(S2 - Mathf.Sqrt(DELTA),G*PJ)
+ --calculate angle
+        
+        --now we can calculate a better time to target using the horizontal speed
+        --as obtained from the firing angle
+        
+T = (P - weaponInfo.GlobalPosition).magnitude / (WS * Mathf.Cos(AG)) 
+        
+
+        FP = P + V*T - I:GetVelocityVector()*T
+  --position target will be
+  
+        AD = FP - weaponInfo.GlobalPosition
+ -- line direct to the target position
+
+
+
+        PJ = Mathf.Sqrt(AD.x*AD.x + AD.z*AD.z)
+  -- horizontal distance to the target
+
+   
+      
+        DELTA = S4 - G*(G*PJ*PJ + 2*AD.y * S2)
+ -- check the parable solution
+
+
+        if ( DELTA > 0 ) then
+        --ok we can reach it and now we have a better estimate
+        PY = (S2 - Mathf.Sqrt(DELTA))/(G)
+ -- no need to calculate angle or tangent, just the elev
+
+
+
+        AD.y = PY --assign new elevation to the firing direction
+
+  
+        if(turretSpinnerIndex < 0) then
+           I:AimWeaponInDirection(weaponIndex, AD.x, AD.y, AD.z, weaponInfo.WeaponSlot)
+           I:FireWeapon(weaponIndex, weaponInfo.WeaponSlot)
+        else
+           I:AimWeaponInDirectionOnTurretOrSpinner(
+                 turretSpinnerIndex,weaponIndex, AD.x, AD.y, AD.z, weaponInfo.WeaponSlot)
+
+         
+           I:FireWeaponOnTurretOrSpinner(
+                 turretSpinnerIndex,weaponIndex,weaponInfo.WeaponSlot)
+
+        end
+  
+      end
+         
+    end
+   return AD
+end
+
+function idleAround(I)
+    idlePosition = I:GetConstructCenterOfMass()
+	com = I:GetConstructCenterOfMass()
+	fcom = I:GetConstructCenterOfMass() + I:GetVelocityVector()
+    if (I:GetFriendlyCount() > 0) then
+        idlePosition = idlePosition / I:GetFriendlyCount()
+        for friendlyIndex=0, I:GetFriendlyCount() do
+            friendlyInfo = I:GetFriendlyInfo(friendlyIndex)
+            idlePosition = friendlyInfo.ReferencePosition / I:GetFriendlyCount()
+        end
+    end
+   
+    flyDirection = I:GetConstructCenterOfMass()-I:GetVelocityVector()-idlePosition
+    	if (com.y < I:GetTerrainAltitudeForLocalPosition(com.x,0,com.z) + minAlt or 
+		 fcom.y < I:GetTerrainAltitudeForLocalPosition(fcom.x,0,fcom.z) + minAlt or
+		 com.y < minAlt) then 
+	  flyDirection = Vector3(0,1,0)
+	    I:LogToHud("EC")
+	I:Component_SetBoolLogicAll(0, true)
+	else
+	I:Component_SetBoolLogicAll(0, false)
+	end
+    flyAlong(I, flyDirection, -I:GetGravityForAltitude(I:GetConstructCenterOfMass().y), 0 )
+end
+
+
+
+BREAK = 0 -- close in to target at max altitude
+SPLIT = 1 -- match target direction rolling down/up according to start alt
+ROLL = 2 -- if enemy vector are parallel, roll into tail
+TARGET = 3 -- aim to a shoot solution
+RUN = 4 -- too close and enemy not fast enough
+LOOP = 5 --enemy is faster loop on it's tail
+YOYO = 6
+EVADE = 9
+TURNFIGHT = 8
+EC = 7
+
+attackState = TARGET
+
+function performManeuver(I,targetInfo,attackState, situation)
+	--some random defaults
+	flyDirection = -I:GetGravityForAltitude(situation.com.y)
+	flyNormal = -I:GetGravityForAltitude(situation.com.y)
+	if (attackState == EC) then
+	    I:LogToHud('CLIMB') 
+		flyDirection = I:GetConstructForwardVector().normalized
+		flyDirection.y = 0.5
+		
+		flyNormal =  -I:GetGravityForAltitude(situation.com.y)
+		I:Component_SetBoolLogicAll(0, true)
+	else
+		I:Component_SetBoolLogicAll(0, false)
+	end
+
+	if (attackState == TARGET) then
+	    I:LogToHud('TARGET')
+		flyNormal = (situation.attackDirection + Vector3(0,2,0)).normalized
+		flyNormal.y = 0.5
+		if(situation.forwardiness < -0.2) then
+			flyDirection = Vector3.Cross(situation.targetDirection, I:GetGravityForAltitude(situation.com.y)).normalized
+			if (situation.operationAltitude*0.9 > 1) then
+				flyDirection.y = 0
+			else
+				flyDirection.y = 0.1
+			end
+		else
+			flyDirection = situation.attackDirection
+		end
+	end
+	
+	if (attackState == BREAK or attackState == EVADE) then
+		I:LogToHud('BREAK')
+		if(situation.forwardiness > 0 or situation.separation < 0) then
+			flyDirection = -situation.targetVelocity.normalized  - situation.targetDirection
+			flyNormal = - situation.targetDirection
+		else
+			flyDirection = -situation.targetDirection
+			flyDirection.y = -Mathf.Sign(situation.targetAltitude)
+			if (situation.operationAltitude*0.9 > 1) then
+				flyDirection.y = 0
+			end
+			if (situation.operationAltitude*0.9 < -1) then
+				flyDirection.y = 0
+			end
+
+
+			flyNormal = Vector3(0,1,0)
+		end
+	end
+	if (attackState == YOYO) then
+		I:LogToHud('YOYO')
+		flyDirection = Vector3(0,-situation.operationAltitude,0)
+		flyNormal = situation.targetDirection
+	end
+	if (attackState == ROLL) then
+		I:LogToHud('ROLL')
+		flyDirection =  situation.targetDirection + Vector3(0,-situation.operationAltitude,0) +  I:GetConstructRightVector() * situation.rightness
+		flyNormal = situation.targetDirection
+	end
+	
+	if (attackState == TURNFIGHT) then
+		I:LogToHud('TURNFIGHT')
+		flyDirection =  Vector3.Cross(situation.targetDirection.normalized, -I:GetGravityForAltitude(situation.com.y))
+		flyNormal = situation.targetDirection
+	end
+	
+	if (attackState == LOOP) then
+		I:LogToHud('LOOP')
+		flyDirection =  -situation.targetVelocity +  Vector3(0, -situation.operationAltitude,0)
+		flyNormal = situation.targetDirection
+	end
+	
+	flyAlong(I, flyDirection, flyNormal, situation.decisionSeed)
+end
+
+
+
+limit = 0
+function attackEnemy(I, AD, targetInfo)
+    situation = {}
+
+	situation.com = I:GetConstructCenterOfMass()
+	situation.futurecom = situation.com + I:GetVelocityVector()
+	situation.attackDirection = AD
+	situation.targetPosition = targetInfo.AimPointPosition
+	situation.targetVelocity = targetInfo.Velocity
+	situation.targetDirection = situation.targetPosition - I:GetConstructCenterOfMass()
+	
+	situation.forwardiness = Vector3.Dot(situation.targetDirection.normalized, I:GetConstructForwardVector())
+	situation.uppiness = Vector3.Dot(situation.targetDirection.normalized, I:GetConstructUpVector())
+	situation.rightness = Vector3.Dot(situation.targetDirection.normalized, I:GetConstructRightVector())
+	situation.accordingness = Vector3.Dot(situation.targetVelocity.normalized, I:GetVelocityVector().normalized)
+	
+	situation.distance = situation.targetDirection.magnitude
+	situation.separation = (situation.targetDirection + situation.targetVelocity  - I:GetVelocityVector()).magnitude
+		
+	situation.operationAltitude = 2*(situation.com.y - minAlt)/(maxAlt-minAlt) - 1   -- -1 .. 1 
+	situation.targetAltitude = 2*(situation.targetPosition.y - minAlt)/(maxAlt-minAlt) - 1   -- -1 .. 1 
+    
+    situation.speedFactor = I:GetVelocityVector().magnitude / (situation.targetVelocity.magnitude+0.01)
+
+    situation.decisionSeed = ((I:GetConstructForwardVector().x + I:GetConstructForwardVector().y + I:GetConstructForwardVector().z)*534534545353.0)%100    
+
+
+	
+	if (attackState == EC and situation.operationAltitude > 0) then
+	    attackState = TARGET 
+	end
+	if (situation.distance >  I:GetVelocityVector().magnitude * 6 * maneuverDistanceFactor ) then  
+		attackState = TARGET 
+	end
+	
+	if (attackState == TARGET  and onlyBomberRun == 0) then
+
+		if (situation.forwardiness < 0 and situation.accordingness > 0 
+		    and situation.separation < I:GetVelocityVector().magnitude * maneuverDistanceFactor ) then
+			if (situation.decisionSeed < 33) then
+				attackState = YOYO
+			end
+			if (situation.decisionSeed > 32 and situation.decisionSeed < 66) then
+				attackState = ROLL
+			end
+			if (situation.decisionSeed > 65) then
+				attackState = LOOP
+			end
+		end
+	
+		if (situation.forwardiness > 0 and situation.accordingness > 0
+		    and situation.separation < I:GetVelocityVector().magnitude * maneuverDistanceFactor) then
+			if(situation.speedFactor > 4) then 
+			   attackState = BREAK
+			else
+				if (situation.decisionSeed < 33) then
+					attackState = YOYO
+				end
+				if (situation.decisionSeed > 32 and situation.decisionSeed < 66) then
+					attackState = TURNFIGHT
+				end
+				if (situation.decisionSeed > 65 ) then
+					attackState = LOOP
+				end
+			end
+		end
+		if (situation.forwardiness > 0 and situation.accordingness < 0
+		  and situation.separation < I:GetVelocityVector().magnitude * 2 * maneuverDistanceFactor) then
+				if (situation.decisionSeed < 33) then
+					attackState = YOYO
+				end
+				if (situation.decisionSeed > 32 and situation.decisionSeed < 66) then
+					attackState = TURNFIGHT
+				end
+				if (situation.decisionSeed > 65 ) then
+					attackState = LOOP
+				end
+		end
+		
+		if (situation.uppiness > 0.5 and situation.separation < I:GetVelocityVector().magnitude * maneuverDistanceFactor) then
+			if (situation.decisionSeed < 33) then
+				attackState = YOYO
+			end
+			if (situation.decisionSeed > 32 and situation.decisionSeed < 66) then
+				attackState = TURNFIGHT
+			end
+			if (situation.decisionSeed > 65 ) then
+				attackState = LOOP
+			end
+		end
+	
+		if (situation.forwardiness < 0 and situation.speedFactor > 4 
+		    and situation.distance < I:GetVelocityVector().magnitude * 4 * maneuverDistanceFactor ) then
+			attackState = BREAK
+		end
+	end
+	if (attackState == TARGET and onlyBomberRun > 0) then
+		if (situation.separation < I:GetVelocityVector().magnitude * 2 * maneuverDistanceFactor) then
+		  			attackState = BREAK
+		end
+		if (situation.forwardiness < 0 and situation.speedFactor > 4 
+		   and situation.distance < I:GetVelocityVector().magnitude * 4 * maneuverDistanceFactor ) then
+			attackState = BREAK
+		end
+	end
+	
+	if (situation.separation > I:GetVelocityVector().magnitude * 2 * maneuverDistanceFactor 
+	   and not (attackState == BREAK) and situation.forwardiness < 0.5) then  
+			attackState = TARGET 
+	end
+	
+	--emergency upcode
+	if (situation.com.y < I:GetTerrainAltitudeForLocalPosition(situation.com.x,0,situation.com.z) + minAlt or
+			situation.futurecom.y < I:GetTerrainAltitudeForLocalPosition(situation.futurecom.x,0,situation.futurecom.z) or
+			situation.com.y < minAlt) then
+       attackState = EC
+    end
+	--emergency evade
+	if (situation.separation < 0 ) then
+	    attackState = EVADE
+	end
+
+    performManeuver(I,targetInfo,attackState, situation)
+
+end
+
+
+function Update(I)
+    
+    targetInfo = I:GetTargetInfo(controllingMainframe, 0)
+    AttackDirection = nil
+	
+	otherInfo = targetInfo
+	--check all other targets and break from any too close to comfort irregardless of priority
+	for targetIndex=0,I:GetNumberOfTargets(controllingMainframe) do
+		otherInfo = I:GetTargetInfo(controllingMainframe, targetIndex)
+		situation = {}
+		situation.com = I:GetConstructCenterOfMass()
+		situation.targetPosition = otherInfo.AimPointPosition
+		situation.targetVelocity = otherInfo.Velocity
+		situation.targetDirection = situation.targetPosition - situation.com
+		
+		
+		situation.separation = (situation.targetDirection + situation.targetVelocity  - I:GetVelocityVector()).magnitude
+			
+		
+		if (situation.separation < I:GetVelocityVector().magnitude) then
+			targetInfo = otherInfo
+		end
+	end 
+	
+	
+    if(targetInfo.Valid) then
+        for weaponIndex=0,I:GetWeaponCount() do
+          weaponInfo = I:GetWeaponInfo(weaponIndex)
+      
+          if ((weaponInfo.WeaponType == 4 or weaponInfo.WeaponType == 0 ) 
+               and weaponInfo.Valid and weaponInfo.PlayerCurrentlyControllingIt == false 
+               and weaponInfo.WeaponSlot == restrictSlot) then
+               AttackDirection = killThatThing(I, weaponInfo, targetInfo, weaponIndex, -1)
+          end
+        end
+        
+        for turretSpinnerIndex=0,I:GetTurretSpinnerCount() do
+            for weaponIndex=0,I:GetWeaponCountOnTurretOrSpinner(turretSpinnerIndex) do
+              weaponInfo = I:GetWeaponInfoOnTurretOrSpinner(turretSpinnerIndex, weaponIndex)
+                if ((weaponInfo.WeaponType == 4 or weaponInfo.WeaponType == 0 ) 
+                and weaponInfo.Valid and weaponInfo.PlayerCurrentlyControllingIt == false 
+                and weaponInfo.WeaponSlot == restrictSlot ) then
+                AttackDirection = killThatThing(I, weaponInfo, targetInfo, weaponIndex, turretSpinnerIndex)
+                end
+            end
+        end
+		if (AttackDirection == nil) then
+			P = targetInfo.AimPointPosition
+			V = targetInfo.Velocity
+		
+			FP = P + V 
+		
+		  
+             I:LogToHud("No weapon configured!!")
+			AttackDirection = FP - I:GetConstructCenterOfMass()
+		end
+		attackEnemy(I, AttackDirection, targetInfo)		
+		I:TellAiThatWeAreTakingControl()
+    end
+        
+end
+
+I:LogToHud("INITIALIZED")

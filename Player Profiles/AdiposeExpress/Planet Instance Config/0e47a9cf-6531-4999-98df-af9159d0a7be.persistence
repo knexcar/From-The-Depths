@@ -1,0 +1,208 @@
+{
+  "PersistentInfoStore": [
+    {
+      "Header": {
+        "Id": {
+          "Id": 695751387
+        },
+        "Type": 1
+      },
+      "PriorPerformance": {
+        "Completed": true,
+        "FastestTime": 109.229362,
+        "CheapestRun": 28705.0,
+        "HighestScore": 64.80989,
+        "Playthroughs": 1
+      },
+      "PlayerSetup": {
+        "ResourcesBought": {
+          "Natural": 0.0,
+          "Metal": 0.0,
+          "Oil": 0.0,
+          "Scrap": 0.0,
+          "Crystal": 0.0
+        },
+        "SpawnPointSelection": {
+          "Id": -1
+        }
+      },
+      "ForceUsageList": [
+        {
+          "ForceId": {
+            "Id": 1236659043
+          },
+          "FilePath": null,
+          "Name": "Javelin",
+          "Usage": 0
+        },
+        {
+          "ForceId": {
+            "Id": 1284083736
+          },
+          "FilePath": null,
+          "Name": "Ocelot",
+          "Usage": 0
+        },
+        {
+          "ForceId": {
+            "Id": 1955795313
+          },
+          "FilePath": null,
+          "Name": "Duster",
+          "Usage": 0
+        },
+        {
+          "ForceId": {
+            "Id": 833204278
+          },
+          "FilePath": null,
+          "Name": "Duster",
+          "Usage": 0
+        }
+      ]
+    },
+    {
+      "Header": {
+        "Id": {
+          "Id": 1960925147
+        },
+        "Type": 1
+      },
+      "PriorPerformance": {
+        "Completed": false,
+        "FastestTime": -1.0,
+        "CheapestRun": -1.0,
+        "HighestScore": -1.0,
+        "Playthroughs": 0
+      },
+      "PlayerSetup": {
+        "ResourcesBought": {
+          "Natural": 0.0,
+          "Metal": 0.0,
+          "Oil": 0.0,
+          "Scrap": 0.0,
+          "Crystal": 0.0
+        },
+        "SpawnPointSelection": {
+          "Id": -1
+        }
+      },
+      "ForceUsageList": [
+        {
+          "ForceId": {
+            "Id": 1864079425
+          },
+          "FilePath": null,
+          "Name": "Ocelot",
+          "Usage": 0
+        },
+        {
+          "ForceId": {
+            "Id": 616430656
+          },
+          "FilePath": null,
+          "Name": "Duster",
+          "Usage": 0
+        }
+      ]
+    },
+    {
+      "Header": {
+        "Id": {
+          "Id": 1470025054
+        },
+        "Type": 1
+      },
+      "PriorPerformance": {
+        "Completed": false,
+        "FastestTime": -1.0,
+        "CheapestRun": -1.0,
+        "HighestScore": -1.0,
+        "Playthroughs": 0
+      },
+      "PlayerSetup": {
+        "ResourcesBought": {
+          "Natural": 0.0,
+          "Metal": 0.0,
+          "Oil": 0.0,
+          "Scrap": 0.0,
+          "Crystal": 0.0
+        },
+        "SpawnPointSelection": {
+          "Id": -1
+        }
+      },
+      "ForceUsageList": [
+        {
+          "ForceId": {
+            "Id": 862967583
+          },
+          "FilePath": null,
+          "Name": "Scrap Platform 11B",
+          "Usage": 0
+        },
+        {
+          "ForceId": {
+            "Id": 913992880
+          },
+          "FilePath": null,
+          "Name": "Scrap Platform 11B",
+          "Usage": 0
+        }
+      ]
+    },
+    {
+      "Header": {
+        "Id": {
+          "Id": 1871410763
+        },
+        "Type": 1
+      },
+      "PriorPerformance": {
+        "Completed": false,
+        "FastestTime": -1.0,
+        "CheapestRun": -1.0,
+        "HighestScore": -1.0,
+        "Playthroughs": 0
+      },
+      "PlayerSetup": {
+        "ResourcesBought": {
+          "Natural": 0.0,
+          "Metal": 0.0,
+          "Oil": 0.0,
+          "Scrap": 0.0,
+          "Crystal": 0.0
+        },
+        "SpawnPointSelection": {
+          "Id": -1
+        }
+      },
+      "ForceUsageList": [
+        {
+          "ForceId": {
+            "Id": 979732784
+          },
+          "FilePath": null,
+          "Name": "Hammer",
+          "Usage": 0
+        },
+        {
+          "ForceId": {
+            "Id": 1355107316
+          },
+          "FilePath": null,
+          "Name": "Steel Warden",
+          "Usage": 0
+        },
+        {
+          "ForceId": {
+            "Id": 1839310461
+          },
+          "FilePath": null,
+          "Name": "Hornet",
+          "Usage": 0
+        }
+      ]
+    }
+  ]
+}

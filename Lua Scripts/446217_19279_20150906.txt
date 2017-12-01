@@ -1,0 +1,9 @@
+function Update(I)
+  local altitude = I:Component_GetFloatLogic(1,1)*100;
+  I:Log(altitude);
+  for ii=0,(I:GetSpinnerCount()-1) do 
+    local height = I:GetSpinnerInfo(ii).Position.y;
+    --I:Log(height);
+    I:SetSpinnerContinuousSpeed(ii,3*1.05^(altitude-height+1)-2);
+  end
+end

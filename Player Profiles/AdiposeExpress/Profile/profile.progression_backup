@@ -1,0 +1,107 @@
+{
+  "Level": 246,
+  "ExperienceOnThisLevel": 12051.701157690928,
+  "UnallocatedStatPoints": 10,
+  "UnallocatedSkillPoints": 174,
+  "Hash": "80d445c48613325c973a13cdbcbd3280",
+  "Attributes": {
+    "leadership": {
+      "level": 0
+    },
+    "gunnery": {
+      "level": 0
+    },
+    "seaCaptain": {
+      "level": 0
+    },
+    "skyCaptain": {
+      "level": 0
+    },
+    "spaceCaptain": {
+      "level": 0
+    },
+    "engineer": {
+      "level": 0
+    },
+    "miner": {
+      "level": 0
+    },
+    "mechanic": {
+      "level": 138
+    },
+    "quartermaster": {
+      "ammoRespawnRateModifier": 1.0,
+      "fuelRespawnRateModifier": 1.0,
+      "ammoProductionRateModifier": 1.0,
+      "fuelProductionRateModifier": 1.0,
+      "sparesProductionRateModifier": 1.0,
+      "level": 0
+    },
+    "melee": {
+      "meleeWeaponDamageModifier": 1.0,
+      "meleeWeaponHitRateModifier": 1.0,
+      "meleeWeaponRangeModifier": 1.0,
+      "meleeWeaponNumberOfHits": 1.0,
+      "level": 0
+    },
+    "smallArms": {
+      "smallArmsDamageModifier": 1.0,
+      "smallArmsReloadRate": 1.0,
+      "smallArmsSpeedModifier": 1.0,
+      "smallArmsAccuracyModifier": 1.0,
+      "level": 0
+    },
+    "largeWeapons": {
+      "level": 100
+    },
+    "endurance": {
+      "level": 0,
+      "DamageMitigationFactor": {
+        "CurrentValue": 1.0,
+        "Description": "Damage taken from enemy weapons reduced to"
+      },
+      "HealthGrowthFactor": {
+        "CurrentValue": 1.0,
+        "Description": "Health regen rate increased to"
+      }
+    },
+    "trading": {
+      "level": 0
+    },
+    "recon": {
+      "level": 0
+    },
+    "fleetCannons": {
+      "level": 0
+    },
+    "fleetLasers": {
+      "level": 0
+    },
+    "fleetMissiles": {
+      "level": 0
+    },
+    "fleetWater": {
+      "level": 0
+    },
+    "fleetAir": {
+      "level": 0
+    },
+    "fleetSpace": {
+      "level": 0
+    },
+    "fleetArmour": {
+      "level": 0
+    },
+    "fleetRepair": {
+      "level": 0
+    },
+    "fleetSupply": {
+      "level": 0
+    },
+    "luck": {
+      "criticalChancePercent": 0.0,
+      "experienceGainFactor": 1.0,
+      "level": 0
+    }
+  }
+}

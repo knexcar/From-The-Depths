@@ -1,0 +1,6 @@
+function Update(I)
+  for ii=0,I:GetSpinnerCount(),1 do
+    I:SetSpinnerPowerDrive(ii,I:GetAirForwards());
+    I:log(I:GetAirForwards());
+  end
+end

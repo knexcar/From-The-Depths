@@ -1,0 +1,81 @@
+{
+  "BuildModeOptions": {
+    "DisplayedComplexity": 3,
+    "SimpleBuildMode": false,
+    "OrientationLockedAsDefault": true,
+    "HoldToBuildSpeed": 2.0,
+    "BuildMarkerControlMode": 2,
+    "BuildMouseButtons": 1
+  },
+  "Gameplay": {
+    "AllowBuiltInModification": false,
+    "WaveFactor": 2.0,
+    "FixedTime": 12.1,
+    "IsTimeFixed": true,
+    "FixedWeather": 0.0,
+    "IsWeatherFixed": true,
+    "EnableSpeedOfSoundDelays": false,
+    "DisableLuck": false,
+    "LoadIntoChair": true
+  },
+  "Multiplayer": {
+    "GameName": "Campaign LAN",
+    "GameComments": "Because my brother lost the world save.",
+    "GamePassword": "",
+    "ResourcePoints": 100000,
+    "PlayerLimit": 2,
+    "TeamLimit": 4,
+    "TeamSelectionMode": 2
+  },
+  "GraphicsAndRendering": {
+    "DisableWaterRemovalEffect": false,
+    "ShowResourcesBarsForEnemies": true,
+    "ComplexBlocks": true,
+    "FOV": 80.0,
+    "SlowMoExplode": false,
+    "ExternalCameraSpeed": 2.0,
+    "ParticleFactor": 0.5,
+    "DesiredMinimumFPS": 30.0,
+    "TrailLengthFactor": 0.5,
+    "MissileTrailLengthFactor": 0.2,
+    "MouseSpeedY": 0.2,
+    "MouseSpeedX": 0.2,
+    "InvertMouseY": false,
+    "AllowShoulderCam": false,
+    "DegradedEnterFPS": 20.0,
+    "DegradedExitFPS": 25.0,
+    "LowLodDistance": 250.0,
+    "HighLodReenterDistance": 187.5
+  },
+  "Interface": {
+    "TopDownViewLocked": true,
+    "TreeViewSortMethod": 0,
+    "HUDRHSType": 2,
+    "HUDRHSTextResource": true,
+    "HUDRHSTextAmmo": true,
+    "HUDRHSTextFuel": true,
+    "HUDRHSTextPower": true,
+    "HUDRHSTextConstructableHealth": true,
+    "HUDRHSTextSpeedMagnitude": true,
+    "HUDRHSTextSpeedVertical": true,
+    "HUDRHSTextDrag": true,
+    "HUDRHSTextWaterDrive": true,
+    "HUDRHSTextAirDrive": true,
+    "HUDRHSTextPrimaryDrive": true,
+    "HUDRHSTextSecondaryDrive": true,
+    "HUDRHSTextTertiaryDrive": true,
+    "HUDRHSTextAltimeter": true,
+    "HUDRHSTextHeading": true,
+    "HUDRHSTextRollPitchYaw": true,
+    "ShowFullOrderedBattleList": true,
+    "WeaponSlotOption": 1
+  },
+  "Persistance": {
+    "CampaignSaveSlot": 4,
+    "DesignerDefaultConstructableName": ""
+  },
+  "Sound": {
+    "MusicVolume": 1.0,
+    "SoundVolume": 0.4
+  }
+}

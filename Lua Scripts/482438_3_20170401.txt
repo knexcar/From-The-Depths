@@ -1,0 +1,55 @@
+function Update(I)
+  altitude = 0;
+--This gets the user-set altitude from the ect.
+  for ii=0,(I:Component_GetCount(1)-1) do
+    if I:Component_GetLocalPosition(1,ii).x==1 then
+      altitude = I:Component_GetFloatLogic(1,ii)*500;
+    end
+    I:Log("Position of Throttle "..ii..": "..I:Component_GetLocalPosition(1,ii).x);
+  end
+  I:Log("Throttle Altitude: "..altitude);
+  if altitude<=0.01 then
+    altitude=250+Mathf.Sin(I:GetTimeSinceSpawn()/5)*50;
+  end
+  local avgHeight = new Vector3();--0
+  local numb_of_spinners = 0;
+--For a spinner to be counted, it must face forwards (Press G looking forwards).
+  for ii=0,(I:GetSpinnerCount()-1) do 
+    --I:Log("Spinner "..ii.." has a vector of "..I:GetSpinnerInfo(ii).LocalForwards.z);
+    if Mathf.Abs(I:GetSpinnerInfo(ii).LocalForwards.z) == 1 then
+      avgHeight = I:GetSpinnerInfo(ii).LocalPosition;--avgHeight+I:GetSpinnerInfo(ii).Position.y-I:GetSpinnerInfo(ii).LocalPosition.y;
+      numb_of_spinners = numb_of_spinners+1;
+    end
+  end
+  avgHeight = avgHeight/numb_of_spinners;
+  local standardPower = 3*1.05^(altitude-I:GetConstructPosition().y+1)+1;
+  if standardPower>20 then
+    standardPower = 20;
+  end
+  local roll;
+  if I:GetConstructRoll() > 180 then
+    roll = I:GetConstructRoll()-360;
+  else
+    roll = I:GetConstructRoll();
+  end
+  local pitch;
+  if I:GetConstructPitch() > 180 then
+    pitch = I:GetConstructPitch()-360;
+  else
+    pitch = I:GetConstructPitch();
+  end
+  if Mathf.Abs(pitch) > 80 then
+    roll = 0;
+  end
+  --roll = roll/4;
+  --pitch = pitch/4;
+  for ii=0,(I:GetSpinnerCount()-1) do
+    if Mathf.Abs(I:GetSpinnerInfo(ii).LocalForwards.z) == 1 then
+      --local height = I:GetSpinnerInfo(ii).Position.y-I:GetSpinnerInfo(ii).LocalPosition.y;
+      --I:SetSpinnerContinuousSpeed(ii,(standardPower+((avgHeight-height)/2)^1)*4);
+        local p = (I:GetSpinnerInfo(ii).LocalPosition-avgHeight).normalized;
+        I:Log(p.x..","..p.y..","..p.z.."test");
+        I:SetSpinnerContinuousSpeed(ii,standardPower+Mathf.Max(Mathf.Min(-p.x*roll+p.z*pitch,10),-10));
+    end
+  end
+end

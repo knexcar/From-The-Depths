@@ -1,0 +1,35 @@
+function Update(I)
+  altitude = 0;
+--This gets the user-set altitude from the ect.
+  for ii=0,(I:Component_GetCount(1)-1) do
+    if I:Component_GetLocalPosition(1,ii).x==1 then
+      altitude = I:Component_GetFloatLogic(1,ii)*500;
+    end
+    I:Log("Position of Throttle "..ii..": "..I:Component_GetLocalPosition(1,ii).x);
+  end
+  I:Log("Throttle Altitude: "..altitude);
+  if altitude<=0 then
+    altitude=100;
+  end
+  local avgHeight = 0;
+  local numb_of_spinners = 0;
+--For a spinner to be counted, it must face forwards (Press G looking forwards).
+  for ii=0,(I:GetSpinnerCount()-1) do 
+    I:Log("Spinner "..ii.." has a vector of "..I:GetSpinnerInfo(ii).LocalForwards.z);
+    if Mathf.Abs(I:GetSpinnerInfo(ii).LocalForwards.z) == 1 then
+      avgHeight = avgHeight+I:GetSpinnerInfo(ii).Position.y-I:GetSpinnerInfo(ii).LocalPosition.y;
+      numb_of_spinners = numb_of_spinners+1;
+    end
+  end
+  avgHeight = avgHeight/numb_of_spinners;
+  local standardPower = 3*1.05^(altitude-avgHeight+1)+1;
+  if standardPower>20 then
+    standardPower = 20;
+  end
+  for ii=0,(I:GetSpinnerCount()-1) do
+    if Mathf.Abs(I:GetSpinnerInfo(ii).LocalForwards.z) == 1 then
+      local height = I:GetSpinnerInfo(ii).Position.y-I:GetSpinnerInfo(ii).LocalPosition.y;
+      I:SetSpinnerContinuousSpeed(ii,(standardPower+((avgHeight-height)/4)^5));
+    end
+  end
+end

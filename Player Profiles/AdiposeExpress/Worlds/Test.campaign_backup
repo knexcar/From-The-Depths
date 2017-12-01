@@ -1,0 +1,490 @@
+{
+  "Instances": [
+    {
+      "Header": {
+        "Id": {
+          "Id": 773057260
+        },
+        "Guid": "7779e958-32ed-41de-8f07-73ccb989e94e",
+        "Type": 0,
+        "Name": "Campaign",
+        "Summary": "Defeat the hellbreakers.",
+        "Status": 0,
+        "DescriptionParagraphs": [],
+        "MissionHeader": {
+          "MissionIndex": 0,
+          "FactionId": null,
+          "HasBeenSetup": false
+        },
+        "CampaignHeader": {
+          "HasBeenSetup": false
+        },
+        "MultiplayerHeader": {
+          "HasBeenSetup": false
+        },
+        "CommonSettings": {
+          "DisplayRelationshipMatrix": true,
+          "DisplayReinforcementsInMenu": true,
+          "DisplayEnemiesInMenu": true,
+          "DisplayNextEnemyWaveSpawn": true,
+          "DisplayFailureConditions": true,
+          "FactionHqGrowFactorAllowEdit": true,
+          "EnemyBlockDestroyedResourceDropAllowEdit": true,
+          "DifficultyDamageModifierAllowEdit": true,
+          "DesignDifficultyWeightingAllowEdit": true,
+          "FactionHqGrowthFactor": 1.0,
+          "AllowableBattlePoints": 10000.0,
+          "EnemyBlockDestroyedResourceDrop": 0.1,
+          "FogOfWarType": 0,
+          "ResourcePointAllowance": 0.0,
+          "ParTime": 60.0,
+          "ReferenceFrame": "-9,-1,-9",
+          "HeartStoneRequirement": 0,
+          "WarpAbility": 1,
+          "ConstructableCleanUp": 0,
+          "AvatarAvailability": 0,
+          "TeamAutoAssignType": 0,
+          "AvatarDamage": 0,
+          "HeartstonePlacement": 0,
+          "BlueprintSpawningOptions": 3,
+          "DesignerOptions": 0,
+          "SavingOptions": 0,
+          "DifficultyDamageModifier": 1.0,
+          "DesignDifficultyWeighting": 1.0,
+          "DesignSaveMethod": 0,
+          "LocalisedResourceMode": 1,
+          "BribingRules": 1,
+          "BuildBarRules": 0,
+          "BuildModeRules": 0,
+          "AccessToMap": 0,
+          "AccessToThirdPersonView": 0,
+          "LuckyMechanic": 0,
+          "ConversionDamageModeForNewSpawns": 1
+        },
+        "IsSinglePlayerDesigner": false,
+        "IsSinglePlayerCampaign": true,
+        "IsSinglePlayerMission": false,
+        "IsMultiplayerCampaign": false,
+        "IsMultiplayerMap": false,
+        "IsAnyCampaign": true,
+        "IsAnyCampaignAndImInCharge": true,
+        "IsAdventure": false
+      },
+      "Progression": {
+        "GameTime": 0.0,
+        "FoWExplored": []
+      },
+      "ResourceZones": {
+        "Zones": [
+          {
+            "Material": {
+              "Quantity": 2900.0,
+              "ReserveAmount": -1.0,
+              "LifetimeAmountGrown": 2900.0,
+              "ReserveRemaining": "Infinity",
+              "Maximum": 2900.0,
+              "Growth": 10.0
+            },
+            "WorldPosition": "-5680.555,50,-5681.157",
+            "Name": "Island Deposit",
+            "Description": "The starting resource",
+            "Radius": 175.0,
+            "Id": {
+              "Id": 341694934
+            }
+          },
+          {
+            "Material": {
+              "Quantity": 10000.0,
+              "ReserveAmount": -1.0,
+              "LifetimeAmountGrown": 10000.0,
+              "ReserveRemaining": "Infinity",
+              "Maximum": 10000.0,
+              "Growth": 100.0
+            },
+            "WorldPosition": "-4527.316,50,4710.579",
+            "Name": "Mother and Child Pool",
+            "Description": "The island houses a lot of resources, if you can capture it you will be unbeatable.",
+            "Radius": 175.0,
+            "Id": {
+              "Id": 1251326301
+            }
+          }
+        ],
+        "Dumps": []
+      },
+      "Territory": {
+        "Info": [
+          [
+            {
+              "O": {
+                "Id": 783346167
+              },
+              "H": {
+                "Id": 783346167
+              },
+              "S": 0,
+              "MaxS": 100
+            },
+            {
+              "O": {
+                "Id": 1353551925
+              },
+              "H": {
+                "Id": 1353551925
+              },
+              "S": 7,
+              "MaxS": 100
+            },
+            {
+              "O": {
+                "Id": 1353551925
+              },
+              "H": {
+                "Id": 1353551925
+              },
+              "S": 100,
+              "MaxS": 100
+            }
+          ],
+          [
+            {
+              "O": {
+                "Id": 1353551925
+              },
+              "H": {
+                "Id": 1353551925
+              },
+              "S": 4,
+              "MaxS": 100
+            },
+            {
+              "O": {
+                "Id": 1353551925
+              },
+              "H": {
+                "Id": 1353551925
+              },
+              "S": 10,
+              "MaxS": 100
+            },
+            {
+              "O": {
+                "Id": 1353551925
+              },
+              "H": {
+                "Id": 1353551925
+              },
+              "S": 4,
+              "MaxS": 100
+            }
+          ],
+          [
+            {
+              "O": {
+                "Id": 1353551925
+              },
+              "H": {
+                "Id": 1353551925
+              },
+              "S": 5,
+              "MaxS": 100
+            },
+            {
+              "O": {
+                "Id": 1353551925
+              },
+              "H": {
+                "Id": 1353551925
+              },
+              "S": 11,
+              "MaxS": 100
+            },
+            {
+              "O": {
+                "Id": 1353551925
+              },
+              "H": {
+                "Id": 1353551925
+              },
+              "S": 0,
+              "MaxS": 100
+            }
+          ]
+        ]
+      },
+      "Factions": {
+        "Factions": [
+          {
+            "Id": {
+              "Id": 783346167
+            },
+            "Players": {
+              "SpawnPoints": [
+                {
+                  "ForceId": {
+                    "Id": -1
+                  },
+                  "Position": "-5922,13,-5974",
+                  "RotationYaw": 96.0,
+                  "ReferenceFrame": 0,
+                  "Description": "Starting Island",
+                  "Name": "New Spawn Point",
+                  "Id": {
+                    "Id": 1313193646
+                  },
+                  "ChairIndex": 0,
+                  "Reuse": 1
+                }
+              ],
+              "PersistentPlayerInfo": []
+            },
+            "Fleets": {
+              "Id": {
+                "Id": 783346167
+              },
+              "Fleets": []
+            },
+            "ResourceStore": {
+              "Material": {
+                "Type": 10,
+                "Quantity": 1000.0,
+                "Maximum": "Infinity",
+                "Fraction": 0.0,
+                "HeadRoom": "Infinity"
+              },
+              "TeamId": {
+                "Id": 783346167
+              }
+            },
+            "eController": 0,
+            "Role": 0,
+            "AllowableOverrides": 1,
+            "RPFactor": 1.0,
+            "Favourites": {
+              "Favourites": []
+            },
+            "VolumeAllowance": "Infinity"
+          },
+          {
+            "Id": {
+              "Id": 1353551925
+            },
+            "Players": {
+              "SpawnPoints": [],
+              "PersistentPlayerInfo": []
+            },
+            "Fleets": {
+              "Id": {
+                "Id": 1353551925
+              },
+              "Fleets": []
+            },
+            "ResourceStore": {
+              "Material": {
+                "Type": 10,
+                "Quantity": 1000.0,
+                "Maximum": "Infinity",
+                "Fraction": 0.0,
+                "HeadRoom": "Infinity"
+              },
+              "TeamId": {
+                "Id": 1353551925
+              }
+            },
+            "eController": 1,
+            "Role": 0,
+            "AllowableOverrides": 0,
+            "RPFactor": 1.0,
+            "Favourites": {
+              "Favourites": []
+            },
+            "VolumeAllowance": "Infinity"
+          }
+        ],
+        "Relationships": {
+          "R": [
+            [
+              0.0,
+              -60.0
+            ],
+            [
+              -60.0,
+              0.0
+            ]
+          ],
+          "RBuildUp": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ]
+          ],
+          "RInfluence": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ]
+          ],
+          "FactionIds": [
+            {
+              "Id": 783346167
+            },
+            {
+              "Id": 1353551925
+            }
+          ]
+        }
+      },
+      "VictoryConditions": {
+        "GroupConditions": [],
+        "PartialConditions": [],
+        "FullConditions": []
+      },
+      "EventSystem": {
+        "Events": []
+      },
+      "MarkerSystem": {
+        "Markers": []
+      },
+      "GameConfiguration": {
+        "AirDragFactorAttribute": {
+          "Value": 1.0,
+          "AllowModification": true,
+          "Modified": false,
+          "BlockModification": false
+        },
+        "WaterDragFactorAttribute": {
+          "Value": 1.0,
+          "AllowModification": true,
+          "Modified": false,
+          "BlockModification": false
+        },
+        "MassFactorAttribute": {
+          "Value": 1.0,
+          "AllowModification": true,
+          "Modified": false,
+          "BlockModification": false
+        },
+        "BuoyancyFactorAttribute": {
+          "Value": 1.25,
+          "AllowModification": true,
+          "Modified": false,
+          "BlockModification": false
+        },
+        "PropulsionForceFactorAttribute": {
+          "Value": 1.25,
+          "AllowModification": true,
+          "Modified": false,
+          "BlockModification": false
+        },
+        "RawResourceStoragePerVolumeAttribute": {
+          "Value": 2000.0,
+          "AllowModification": true,
+          "Modified": false,
+          "BlockModification": false
+        },
+        "DamageMultiplier": {
+          "Value": 1.0,
+          "AllowModification": true,
+          "Modified": false,
+          "BlockModification": false
+        },
+        "AutomaticDetection": {
+          "Value": 1.0,
+          "AllowModification": true,
+          "Modified": false,
+          "BlockModification": false
+        }
+      },
+      "Adventure": {
+        "WarpGates": [],
+        "CurrentPlaneType": 1,
+        "TimeInWarpPlane": 0.0,
+        "WarpPlaneDifficulty": 1.0,
+        "PrimaryForceId": null,
+        "PrimaryForcePositions": {
+          "Buffer": [
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0"
+          ],
+          "Size": 60,
+          "CurrentRecord": -1,
+          "CurrentPositionInBuffer": -1
+        },
+        "TimeSinceWeLoggedPosition": 0.0,
+        "DistanceTravelledSinceWarpGateSpawned": 0.0,
+        "DistanceTravelledSinceForcesSpawned": 0.0,
+        "DistanceTravelledSinceResourceSpawned": 0.0,
+        "HunterFleetBuildUp": 0.0,
+        "InstanceWeatherPoorness": 0.0
+      }
+    }
+  ],
+  "Type": 0
+}

@@ -1,0 +1,8 @@
+function Update(I)
+ if I:GetConstructPosition().y<220 then
+  I:SetSpinnerContinuousSpeed(0,18)
+ end
+ if I:GetConstructPosition().y>270 then
+  I:SetSpinnerContinuousSpeed(0,2)
+ end
+end

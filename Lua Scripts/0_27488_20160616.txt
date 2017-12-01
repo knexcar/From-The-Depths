@@ -1,0 +1,498 @@
+--[[
+Advanced aerial AI, version 4.21
+Created by Madwand 10/24/2015
+Use and modify this code however you like, however please credit me
+if you use this AI or a derivative of it in a tournament, or you publish a blueprint
+using it. Also let me know if you make any significant improvements,
+so I can add them back into the code.
+ 
+Documentation on the options is available at http://pastebin.com/36eFGAzV
+--]]
+ 
+-- BASIC OPTIONS
+AngleBeforeTurn = 0
+AngleBeforeRoll = 50
+AttackRunDistance = 2000
+AbortRunDistance = 100
+ClosingDistance = 1000
+ForceAttackTime = 15
+CruiseAltitude = 300
+MaxElevationAngle = 40
+CruiseSpeed = 5
+AttackRunSpeed = 4
+EscapeSpeed = 5
+RollingSpeed = 5
+ClosingSpeed = 5
+OrbitSpawn = true
+ 
+-- AIRSHIP/HELICOPTER OPTIONS
+UseAltitudeJets = false
+UseSpinners = false
+MinHelicopterBladeSpeed = 10
+MaxHelicopterBladeSpeed = 30
+UseVTOLBeneathSpeed = 0
+VTOLEngines = nil
+ 
+-- TERRAIN AVOIDANCE OPTIONS
+TerrainAvoidanceStrategy = 1
+MinAltitude = 100
+MaxAltitude = 400
+TerrainLookahead = {0,1,2,4}
+MaxTerrainSpeed = 5
+ 
+-- WATER START OPTIONS
+DeployAlt = 5
+ReleaseAlt = 15
+EnableEnginesAlt = 5
+ 
+-- COLLISION AVOIDANCE OPTIONS
+CollisionTThreshold = 4
+CollisionDetectionHeight = 30
+CollisionAngle = 40
+ 
+-- FLOCKING OPTIONS
+NeighborRadius = 200
+IgnoreBelowSpeed = 0
+FlockWithBlueprintNames = 'all'
+AlignmentWeight = 1
+CohesionWeight = 1
+SeparationWeight = 1.5
+InjuredWeight = 0
+LongRangeWeight = .5
+TerrainAvoidanceWeight = 0
+TargetWeight = 1
+ 
+-- "DOGFIGHTING" OPTIONS
+MatchTargetAltitude = false
+MatchAltitudeRange = 300
+MatchAltitudeOffset = 0
+MinMatchingAltitude = 100
+ 
+-- VECTOR THRUST OPTIONS
+VTSpinners = nil
+MaxVTAngle = {30,30,30,90} -- yaw, roll, pitch, VTOL
+VTProportional = {1,1,1}
+VTDelta = {.1,.1,0}
+VTOLSpinners = 'all'
+ 
+-- MISSILE AVOIDANCE OPTIONS
+WarningMainframe = -1
+RunAwayTTT = 2
+RunAngle = 180
+DodgeTTT = 1
+DodgingRollTolerance = 60
+DangerRadius = 20
+NormalSpeed = 100
+CraftRadius = 10
+DodgingSpeed = 5
+ 
+-- ADVANCED OPTIONS
+MODE = 2
+AltitudeClamp = .2
+PitchDamping = 90
+YawDamping = 90
+RollDamping = 45
+MainDriveControlType = 0
+MinimumSpeed = 0
+MaximumSpeed = 999
+MaxRollAngle = 100
+RollTolerance = 30
+DebugMode = false
+UsePreferredSide = false
+UsePredictiveGuidance = false
+AltitudeOffset = 0
+AngleOfEscape = AngleBeforeTurn
+ExcludeSpinners = nil
+ 
+--Static variables. Do not change these.
+DRIVELEFT = 0
+DRIVERIGHT = 1
+ROLLLEFT = 2
+ROLLRIGHT = 3
+DRIVEUP = 4
+DRIVEDOWN = 5
+DRIVEMAIN = 8
+DriveTypeDesc = {'Left','Right','RLeft','RRight','PUp','PDown','','','Main'}
+ 
+firstpass = true
+state = "cruise"
+onattackrun = false
+WaterStarted = false
+NextAttackTime = 0
+OverTerrain = false
+PitchCorrection = 0
+RollSpinners = {}
+PitchSpinners = {}
+YawSpinners = {}
+DownSpinners = {}
+AllSpinners = {}
+ExcludedSpinners = {}
+HeliSpinners = {}
+RollEngines = {}
+PitchEngines = {}
+EngineDF = {}
+SpinnerStartRotations={}
+DYaw = 0
+NumSpinners = 0
+NumEngines = 0
+ 
+--Try to pitch (or yaw, if necessary) to a given angle of elevation
+function AdjustElevationToAngle(I,DesiredElevation)
+  local PitchSpeedCheck = math.abs(DesiredElevation-Pitch)/PitchDamping
+  local YawSpeedCheck = math.abs(DesiredElevation-Pitch)/YawDamping
+  if (Pitch > DesiredElevation) then
+    if (math.abs(Roll)>135) then
+      Control(I,DRIVEUP,PitchSpeedCheck,DPitch)
+    elseif (Roll<-45) then
+      Control(I,DRIVERIGHT,YawSpeedCheck,DYaw)
+    elseif (Roll>45) then
+      Control(I,DRIVELEFT,YawSpeedCheck,-DYaw)
+    elseif (math.abs(Roll)<45 and state~="rolling") then
+      Control(I,DRIVEDOWN,PitchSpeedCheck,-DPitch)
+    end
+  elseif (Pitch < DesiredElevation) then
+    if (math.abs(Roll)>135 and state~="rolling") then
+      Control(I,DRIVEDOWN,PitchSpeedCheck,-DPitch)
+    elseif (Roll<-45) then
+      Control(I,DRIVELEFT,YawSpeedCheck,-DYaw)
+    elseif (Roll>45) then
+      Control(I,DRIVERIGHT,YawSpeedCheck,DYaw)
+    elseif (math.abs(Roll)<45) then
+      Control(I,DRIVEUP,PitchSpeedCheck,DPitch)
+    end
+  end
+end
+ 
+--Calculate desired altitude and go there
+function AdjustAltitude(I, Engaged, Pos, CollisionAlt)
+  local DesiredAltitude = CruiseAltitude
+  local MatchingAltitude = Engaged and MatchTargetAltitude and Pos.GroundDistance < MatchAltitudeRange
+  if MatchingAltitude then
+    local EnemyAlt = UsePredictiveGuidance and CollisionAlt or Pos.AltitudeAboveSeaLevel
+    DesiredAltitude = math.max(math.min(EnemyAlt+MatchAltitudeOffset,MaxAltitude),MinMatchingAltitude)
+  end
+ 
+  if (TerrainAvoidanceStrategy>0) then
+    DesiredAltitude = AdjustAltitudeForTerrain(I, DesiredAltitude, MatchingAltitude)
+  end
+ 
+  local AltPower = limiter((DesiredAltitude-Alt)*AltitudeClamp,1)
+  if ((Alt < DesiredAltitude or VTOLEngines) and I:GetVelocityMagnitude()<UseVTOLBeneathSpeed) then
+    VTPower[4]=math.max(.2,AltPower)
+    AdjustElevationToAngle(I, 0)
+  else
+    local Angle = math.min(math.abs(Alt-DesiredAltitude)*AltitudeClamp,MaxElevationAngle)
+    if ((Alt<MinAltitude and Pitch<0) or (Alt>MaxAltitude and Pitch>0)) then
+      Angle = MaxElevationAngle
+    end -- pull up/down with full strength if we are below/above min/max altitudes
+    AdjustElevationToAngle(I, (Alt < DesiredAltitude) and Angle or -Angle)
+  end
+ 
+  AdjustAltitudeJets(I,AltPower)
+  AdjustHelicopterBlades(I,AltPower)
+ 
+  return DesiredAltitude
+end
+ 
+function AdjustAltitudeJets(I,AltPower)
+  if not UseAltitudeJets then return end
+  if (AltPower>0) then
+    I:RequestThrustControl(4,AltPower)
+    vertical = "up"
+  else
+    I:RequestThrustControl(5,-AltPower)
+    vertical = "down"
+  end
+end
+ 
+function ControlVTOLPower(I)
+  local DriveFraction = {}
+  if VTPower[4]~=0 then
+    for k,v in pairs(PitchEngines) do DriveFraction[k] = VTPower[4]*EngineDF[k] end
+    ComputeEngines(DriveFraction, RollEngines, 2)
+    ComputeEngines(DriveFraction, PitchEngines, 3)
+  else
+    for k,v in pairs(PitchEngines) do DriveFraction[k] = EngineDF[k] end
+  end
+  for k, v in pairs(PitchEngines) do I:Component_SetFloatLogic(9,k,DriveFraction[k]) end
+end
+ 
+function AdjustHelicopterBlades(I,AltPower)
+  if not UseSpinners then return end
+  local MidSpeed = (MaxHelicopterBladeSpeed-MinHelicopterBladeSpeed)/2
+  local SpinSpeed = MinHelicopterBladeSpeed+MidSpeed+AltPower*MidSpeed
+  if not VTSpinners then
+    for p = 0, NumSpinners-1 do
+      if not ExcludedSpinners[p] then I:SetSpinnerContinuousSpeed(p, SpinSpeed) end
+    end
+  else
+    for k,v in pairs(HeliSpinners) do I:SetSpinnerContinuousSpeed(v, SpinSpeed) end
+  end
+end
+ 
+-- Get the current stats about angles of the vehicle
+function GetAngleStats(I)
+  Roll = I:GetConstructRoll()
+-- transform roll into roll we are familiar with from the game
+  if (Roll > 180) then Roll = Roll-360 end
+ 
+  Pitch = I:GetConstructPitch()
+-- transform pitch into pitch we are familiar with from the game
+  if (Pitch > 180) then
+    Pitch = 360 - Pitch
+  elseif (Pitch>0) then
+    Pitch = -Pitch
+  end
+ 
+  Yaw = I:GetConstructYaw()
+ 
+-- Many vehicles need to keep their nose pitched upwards relative to velocity.
+-- This uses basic machine learning to calculate the upwards pitch correction.
+  if not VTPower or VTPower[4]==0 then -- if we haven't been in VTOL mode
+    VPitch = math.deg(math.asin(I:GetVelocityVectorNormalized().y)) -- observed pitch from velocity
+    PitchCorrection = limiter(PitchCorrection + .01*(Pitch-VPitch-PitchCorrection),MaxElevationAngle)
+    Pitch = Pitch - PitchCorrection
+  end
+ 
+  local AngularVelocity = I:GetLocalAngularVelocity()
+  DPitch = -AngularVelocity.x
+  DYaw = DYaw+.1*(AngularVelocity.y-DYaw)
+  DRoll = AngularVelocity.z
+ 
+  CoM = I:GetConstructCenterOfMass()
+  Alt = CoM.y
+  ForwardV = I:GetConstructForwardVector()
+end
+ 
+function sign(x)
+  return x>0 and 1 or x<0 and -1 or 0
+end
+ 
+function GetModifiedAzimuth(Azimuth, Offset)
+  local Azimuth = Azimuth-(UsePreferredSide and 1 or sign(Azimuth))*Offset
+  if math.abs(Azimuth)>180 then return Azimuth-sign(Azimuth)*360 end
+  return Azimuth
+end
+ 
+-- returns true if we are yawing, false if we are rolling
+function TurnTowardsAzimuth(I, Azimuth, Offset, DesiredAltitude, RTolerance, Flock)
+  Azimuth = GetModifiedAzimuth(Azimuth, Offset)
+  if Flock>0 then Azimuth=Flocking(I,Azimuth,Flock>1) end
+  if (VTPower[4]==0 and math.abs(Azimuth) > AngleBeforeRoll-Offset) then -- roll to turn
+    RollTowardsAzimuth(I,Azimuth,DesiredAltitude,RTolerance)
+    YawTowardsAzimuth(I,Azimuth)
+    state = "rolling"
+    return false
+  end -- yaw to turn
+  AdjustRollToAngle(I, 0)
+  state = "yawing"
+  YawTowardsAzimuth(I,Azimuth)
+  return true
+end
+ 
+-- Try to roll the craft and pull up on pitch controls to face a given azimuth (relative to the vehicles facing)
+-- Will try to set roll angle at one that will maintain a given altitude
+function RollTowardsAzimuth(I,Azimuth,DesiredAltitude,Tolerance)
+-- depending on our altitude, RollAngle will be set to 90 +/- 40 degrees to climb or descend as appropriate
+  RollAngle = sign(Azimuth)*math.min(MaxRollAngle, 90+limiter((Alt-DesiredAltitude)*.66, 30))
+ 
+  AdjustRollToAngle(I,RollAngle)
+ 
+  if (sign(Roll)==sign(Azimuth) and Roll >= RollAngle-Tolerance and Roll <= RollAngle+Tolerance) then -- start pitching
+    Control(I, DRIVEUP,1,0)
+  end
+end
+ 
+-- Roll the vehicle to a specified roll angle
+function AdjustRollToAngle(I,Angle)
+  local RollSpeedCheck = math.abs(Angle-Roll)/RollDamping
+  if (Roll < Angle) then
+    Control(I, ROLLLEFT,RollSpeedCheck,DRoll)
+  elseif (Roll > Angle) then
+    Control(I, ROLLRIGHT,RollSpeedCheck,-DRoll)
+  end
+  --I:LogToHud(string.format("%.2f %.2f %.2f %.2f", Angle, Roll, RollSpeedCheck, DRoll))
+end
+ 
+-- transform an absolute azimuth into one relative to the nose of the vehicle
+function GetRelativeAzimuth(AbsAzimuth)
+  local Azimuth = math.abs(Yaw-AbsAzimuth)
+  if (Azimuth>180) then Azimuth = 360-Azimuth end
+  if (Yaw>AbsAzimuth) then return Azimuth end
+  return -Azimuth
+end
+     
+-- Yaw the vehicle towards a given aziumth (relative to the vehicle's facing)
+function YawTowardsAzimuth(I,Azimuth)
+  if (math.abs(Roll)<30) then
+    local YawSpeedCheck = math.abs(Azimuth)/YawDamping
+    if (Azimuth > 0) then
+      Control(I, DRIVELEFT,YawSpeedCheck,-DYaw)
+    elseif (Azimuth < 0) then
+      Control(I, DRIVERIGHT,YawSpeedCheck,DYaw)
+    end
+    return true
+  end
+  return false
+end
+ 
+-- No enemies, just cruise along
+function Cruise(I)
+  if OrbitSpawn and I:GetNumberOfMainframes()>0 then
+    SpawnInfo = I:GetTargetPositionInfoForPosition(0, SpawnPos.x, 0, SpawnPos.z)
+    NavigateToPoint(I, false, SpawnInfo)
+  else
+    if I:GetNumberOfMainframes()==0 then
+      I:LogToHud("No AI mainframe found; please add one!")
+    end
+    state = "cruise"
+    AdjustAltitude(I,false,nil,0)
+    AdjustRollToAngle(I, 0)
+    SetSpeed(I, CruiseSpeed)
+    NextAttackTime = I:GetTime()+ForceAttackTime
+  end
+end
+ 
+-- Given the current velocity vector and an azimuth, get the expected terrain height in that direction
+function GetTerrainAltitude(I, VelocityV, Angle)
+  local TerrainAltitude = -999
+  for i,Lookahead in ipairs(TerrainLookahead) do
+    Position = CoM + Quaternion.Euler(0,Angle,0) * VelocityV * Lookahead
+    TerrainAltitude = math.max(TerrainAltitude,I:GetTerrainAltitudeForPosition(Position))
+  end
+  return TerrainAltitude
+end
+ 
+-- Adjust a given altitude to compensate for terrain, according to "TerrainAvoidanceStrategy"
+-- and other terrain-avoidance-specific parameters.
+-- Last parameter forces the use of "TerrainAvoidanceStrategy" 2
+-- returns new altitude that should be used
+function AdjustAltitudeForTerrain(I, Altitude, StrategyOverride)
+  VelocityV = I:GetVelocityVector()
+  TerrainAltitude = math.max(GetTerrainAltitude(I, VelocityV, 0),GetTerrainAltitude(I, VelocityV, 30),GetTerrainAltitude(I, VelocityV, -30))
+ 
+  OverTerrain = false
+  if (TerrainAltitude + MinAltitude > Altitude or TerrainAltitude>0) then -- we'll need to avoid the terrain
+    OverTerrain = TerrainAltitude + MinAltitude > Altitude
+   
+    if(StrategyOverride or TerrainAvoidanceStrategy == 2) then -- don't change altitude unless needed
+      Altitude = math.max(Altitude, TerrainAltitude + MinAltitude)
+    elseif(TerrainAvoidanceStrategy == 1) then -- just add Altitude to terrain height
+      Altitude = math.max(math.min(TerrainAltitude+Altitude, MaxAltitude), TerrainAltitude + MinAltitude)
+    end
+  end
+ 
+  --I:LogToHud(string.format("TA: %.2f Here: %.2f Alt: %.2f", TerrainAltitude, I:GetTerrainAltitudeForLocalPosition(0, 0, 0), Altitude))
+ 
+  return Altitude
+end
+ 
+function GetIntercept(I, Pos)
+  local mySpeed = I:GetVelocityMagnitude()
+  local TTT = FindConvergence(I, Pos.Position, Pos.Velocity, CoM, mySpeed, mySpeed*.75)
+  local Prediction = Pos.Position + Pos.Velocity * TTT
+  return TTT, I:GetTargetPositionInfoForPosition(0, Prediction.x, Prediction.y, Prediction.z).Azimuth, Prediction.y
+end
+ 
+-- Perform a water start check. Returns true if movement is permitted.
+function WaterStartCheck(I)
+  if (Alt < DeployAlt) then
+    I:Component_SetBoolLogicAll(0, true)
+    WaterStarted = true
+  elseif (WaterStarted and Alt > ReleaseAlt) then
+    I:Component_SetBoolLogicAll(0, false)
+    WaterStarted = false
+  end
+ 
+  if (not WaterStarted or Alt>=EnableEnginesAlt) then
+    return true
+  end
+  return false
+end
+ 
+function SetSpeed(I, Speed)
+  if (I:GetVelocityMagnitude()>MaximumSpeed) then Speed=1
+  elseif (I:GetVelocityMagnitude()<MinimumSpeed) then Speed=5 end
+  if MainDriveControlType==1 then
+    I:RequestThrustControl(0,Speed/5)
+  elseif MainDriveControlType==2 then
+    I:RequestControl(MODE,DRIVEMAIN,5)
+    for k, v in pairs(Main) do I:Component_SetFloatLogic(9,v,Speed/5) end
+  else
+    I:RequestControl(MODE,DRIVEMAIN,Speed)
+  end
+end
+ 
+function limiter(p,l)
+  return math.min(l,math.max(-l,p))
+end
+ 
+function Control(I, Type, SpeedCheck, Delta)
+  local DoFType = math.floor(Type/2)+1
+  if (SpeedCheck>Delta) then
+    I:RequestControl(MODE, Type, 1)
+    DriveDesc[DoFType] = DriveTypeDesc[Type+1]
+  end
+  VTPower[DoFType] = (Type%2*2-1)*limiter(SpeedCheck*VTProportional[DoFType]-Delta*VTDelta[DoFType],1)
+end
+ 
+function ComputeSpinners(Rotation, Spinners, Axis)
+  for Spinner,Dir in pairs(Spinners) do
+    Rotation[Spinner] = Rotation[Spinner] + Dir*VTPower[Axis]*MaxVTAngle[Axis]
+  end
+end
+ 
+function ComputeEngines(DriveFraction, Engines, Axis)
+  for Engine,Dir in pairs(Engines) do
+    if Dir==sign(VTPower[Axis]) then
+      DriveFraction[Engine] = DriveFraction[Engine]*(1-math.abs(VTPower[Axis]))
+    end
+  end
+end
+ 
+function VectorEngines(I)
+  local RL,RR,RY = 0,0,0
+ 
+  local Rotation = {}
+  for k,v in pairs(AllSpinners) do Rotation[v] = 0 end
+ 
+  if (state=="rolling" and VTPower[3]>0) then
+    VTPower[3]=0
+  end
+  ComputeSpinners(Rotation, YawSpinners, 1)
+  ComputeSpinners(Rotation, RollSpinners, 2)
+  ComputeSpinners(Rotation, PitchSpinners, 3)
+  if (VTOLEngines and VTPower[4]~=0) then -- VTOL Mode
+    for Spinner,Dir in pairs(DownSpinners) do Rotation[Spinner] = Dir*MaxVTAngle[4] end
+  else
+    ComputeSpinners(Rotation, DownSpinners, 4)
+  end
+ 
+  RotateSpinnersTo(I,Rotation)
+ 
+  --I:LogToHud(string.format("Y: %.02f R: %.02f P: %.02f", VTPower[1], VTPower[2], VTPower[3]))
+end
+ 
+function ClassifySpinner(I,p)
+  if VTSpinners=='all' and ExcludedSpinners[p] then return end
+  local info = I:GetSpinnerInfo(p)
+  local h,a,b = EulerAngles(info.LocalRotation)
+  local pos = info.LocalPositionRelativeToCom
+  SpinnerStartRotations[p]=info.LocalRotation
+  a=math.floor(a+.5)
+  b=math.floor(b+.5)
+  if (a==0 and b==0) then
+    tinsert(pos.z,YawSpinners,1,-1,p)
+    AddSpinner(pos.y,-1,p)
+  elseif (a==0 and math.abs(b)>170) then
+    tinsert(pos.z,YawSpinners,-1,1,p)
+    AddSpinner(pos.y,1,p)
+  else
+    local h,a,b = EulerAngles(info.LocalRotation*Quaternion.Euler(0, 0, 90))
+    h=math.floor(h+.5)
+    a=math.floor(a+.5)
+    if (h==0 and a==0) then -- pointed right
+      tinsert(pos.z,PitchSpinners,1,-1,p)
+      if VTOLSpinners=='all' and ExcludedSpinners[p] then tinsert(pos.z,DownSpinners,-1,-1,p) end
+      AddSpinner(pos.x,-1,p)
+    elseif (a==0 and math.abs(h)>170) then -- p

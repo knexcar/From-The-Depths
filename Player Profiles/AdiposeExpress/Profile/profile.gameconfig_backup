@@ -1,0 +1,50 @@
+{
+  "AirDragFactorAttribute": {
+    "Value": 1.0,
+    "AllowModification": true,
+    "Modified": false,
+    "BlockModification": false
+  },
+  "WaterDragFactorAttribute": {
+    "Value": 1.0,
+    "AllowModification": true,
+    "Modified": false,
+    "BlockModification": false
+  },
+  "MassFactorAttribute": {
+    "Value": 1.0,
+    "AllowModification": true,
+    "Modified": false,
+    "BlockModification": false
+  },
+  "BuoyancyFactorAttribute": {
+    "Value": 1.25,
+    "AllowModification": true,
+    "Modified": false,
+    "BlockModification": false
+  },
+  "PropulsionForceFactorAttribute": {
+    "Value": 1.25,
+    "AllowModification": true,
+    "Modified": false,
+    "BlockModification": false
+  },
+  "RawResourceStoragePerVolumeAttribute": {
+    "Value": 2000.0,
+    "AllowModification": true,
+    "Modified": false,
+    "BlockModification": false
+  },
+  "DamageMultiplier": {
+    "Value": 1.0,
+    "AllowModification": true,
+    "Modified": false,
+    "BlockModification": false
+  },
+  "AutomaticDetection": {
+    "Value": 1.0,
+    "AllowModification": true,
+    "Modified": false,
+    "BlockModification": false
+  }
+}

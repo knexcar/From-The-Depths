@@ -1,0 +1,36 @@
+function Update(I)
+--This gets the user-set altitude from the ect.
+  for ii=0,(I:Component_GetCount(1)-1) do
+    if I:Component_GetLocalPosition(1,ii).x==0 then
+      altitude = I:Component_GetFloatLogic(1,ii)*200+50;
+    end
+    I:Log("Position of Throttle "..ii..": "..I:Component_GetLocalPosition(1,ii).x);
+  end
+  I:Log("Desired Altitude: "..altitude);
+  if altitude>=40 then
+    altitude=-50+Mathf.Sin(I:GetTimeSinceSpawn()/50)*10;
+  end
+  local avgHeight = 0;
+  for ii=0,(I:Component_GetCount(2)-1) do 
+    avgHeight = avgHeight+I:Component_GetBlockInfo(2,ii).Position.y;
+  end
+  avgHeight = avgHeight/I:Component_GetCount(2);
+  local standardPower = 0.05*1.1^(altitude-avgHeight+3)+0.0;
+  local pitch = I:GetConstructPitch();
+  if pitch > 180 then
+    pitch = pitch-360;
+  end
+  local foilPower = (altitude-avgHeight+pitch)*I:GetForwardsVelocityMagnitude()/80;
+  I:Log("Pitch: "..pitch)
+  if standardPower>0.7 then
+    standardPower = 0.7;
+  end
+  for ii=0,(I:Component_GetCount(2)) do 
+    local height = I:Component_GetBlockInfo(2,ii).Position.y;
+    I:Component_SetFloatLogic(2,ii,standardPower+Mathf.Min(2*(avgHeight-height)^3,standardPower));
+  end
+    --Hydrofoil Code
+  for ii=0,(I:Component_GetCount(8)) do
+    I:Component_SetFloatLogic(8,ii,foilPower*I:Component_GetBlockInfo(8,ii).LocalPositionRelativeToCom.z);
+  end
+end

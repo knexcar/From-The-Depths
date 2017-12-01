@@ -1,0 +1,18 @@
+function Update(I)
+--This gets the user-set altitude from the ect.
+  local altitude = I:Component_GetFloatLogic(1,1)*100;
+  --I:Log(altitude);
+  local avgHeight = 0;
+  for ii=0,(I:GetSpinnerCount()-1) do 
+    avgHeight = avgHeight+I:GetSpinnerInfo(ii).Position.y;
+  end
+  avgHeight = avgHeight/I:GetSpinnerCount();
+  local standardPower = 3*1.05^(altitude-avgHeight+1)-2;
+ if standardPower>20 then
+    standardPower = 20;
+  end
+  for ii=0,(I:GetSpinnerCount()-1) do 
+    local height = I:GetSpinnerInfo(ii).Position.y;
+    I:SetSpinnerContinuousSpeed(ii,standardPower+(avgHeight-height)^(1/3));
+  end
+end

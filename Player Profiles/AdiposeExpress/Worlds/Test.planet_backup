@@ -1,0 +1,16 @@
+{
+  "Name": "Test Planet",
+  "Summary": "I was bored.",
+  "PlanetIdentifier": "5659c506-9ee6-48e8-9b74-36839da6303f",
+  "VersionIdentifier": "af7853ee-2aee-4c73-b9d8-8c3f409797a4",
+  "FileModelVersion": {
+    "Major": 1,
+    "Minor": 0
+  },
+  "DefaultWorldPosition": "-5711.228,0,-5694.374",
+  "CampaignMainMenuPanelText": "Embark on a new campaign to overthrow the faction houses of the planet. You must first gather resource, fortify and build a fleet. Then you can engage enemy forces, conquer the world and hunt out new resource zones. Press <color=cyan>M</color> and <color=cyan>E</color> to activate the strategic map / tactical map. Press <color=cyan>F1</color> for diplomacy and objectives.",
+  "StoryMissionMainMenuPanelText": "Embark on a series of challenges spread over eight campaigns. \n\n You should design and use your own vehicles to complete these difficult challenges!",
+  "DesignerMainMenuPanelText": "Enjoy all the freedom you need to build and experiment with different vehicles and fortresses. \n\nIn this mode you can save and load various designs which will also be available to you in the single player campaign and story missions.",
+  "AllowAdventures": false,
+  "AllowStories": false
+}

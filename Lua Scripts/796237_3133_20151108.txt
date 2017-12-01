@@ -1,0 +1,11 @@
+altitude = 100;
+function Update(I)
+--This gets the altitude at the start.
+  if altitude == 0 then 
+    altitude = I:Component_GetFloatLogic(1,1)*100;
+  end
+
+  local height = I:GetConstructPosition().y;
+  local standardPower = 3*1.05^(altitude-height+1)+2;
+  I:SetSpinnerContinuousSpeed(0,standardPower);
+end

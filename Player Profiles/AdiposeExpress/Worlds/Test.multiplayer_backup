@@ -1,0 +1,631 @@
+{
+  "Instances": [
+    {
+      "Header": {
+        "Id": {
+          "Id": 110422561
+        },
+        "Guid": "7e41d3b2-5318-493b-9c50-c096768ef16c",
+        "Type": 2,
+        "Name": "Basic Designer",
+        "Summary": "Multiplayer designer with a simple starting raft",
+        "Status": 0,
+        "DescriptionParagraphs": [],
+        "MissionHeader": {
+          "MissionIndex": 0,
+          "FactionId": null,
+          "HasBeenSetup": false
+        },
+        "CampaignHeader": {
+          "HasBeenSetup": false
+        },
+        "MultiplayerHeader": {
+          "HasBeenSetup": false
+        },
+        "CommonSettings": {
+          "DisplayRelationshipMatrix": true,
+          "DisplayReinforcementsInMenu": true,
+          "DisplayEnemiesInMenu": true,
+          "DisplayNextEnemyWaveSpawn": false,
+          "DisplayFailureConditions": false,
+          "FactionHqGrowFactorAllowEdit": true,
+          "EnemyBlockDestroyedResourceDropAllowEdit": true,
+          "DifficultyDamageModifierAllowEdit": true,
+          "DesignDifficultyWeightingAllowEdit": true,
+          "FactionHqGrowthFactor": 1.0,
+          "AllowableBattlePoints": 10000.0,
+          "EnemyBlockDestroyedResourceDrop": 0.1,
+          "FogOfWarType": 1,
+          "ResourcePointAllowance": "Infinity",
+          "ParTime": 60.0,
+          "ReferenceFrame": "-5946.444,0,-5962.514",
+          "HeartStoneRequirement": 0,
+          "WarpAbility": 0,
+          "ConstructableCleanUp": 1,
+          "AvatarAvailability": 0,
+          "TeamAutoAssignType": 0,
+          "AvatarDamage": 0,
+          "HeartstonePlacement": 0,
+          "BlueprintSpawningOptions": 4,
+          "DesignerOptions": 2,
+          "SavingOptions": 0,
+          "DifficultyDamageModifier": 1.0,
+          "DesignDifficultyWeighting": 1.0,
+          "DesignSaveMethod": 0,
+          "LocalisedResourceMode": 0,
+          "BribingRules": 1,
+          "BuildBarRules": 0,
+          "BuildModeRules": 0,
+          "AccessToMap": 0,
+          "AccessToThirdPersonView": 0,
+          "LuckyMechanic": 0,
+          "ConversionDamageModeForNewSpawns": 0
+        },
+        "IsSinglePlayerDesigner": false,
+        "IsSinglePlayerCampaign": false,
+        "IsSinglePlayerMission": false,
+        "IsMultiplayerCampaign": false,
+        "IsMultiplayerMap": true,
+        "IsAnyCampaign": false,
+        "IsAnyCampaignAndImInCharge": false,
+        "IsAdventure": false
+      },
+      "Progression": {
+        "GameTime": 0.0,
+        "FoWExplored": []
+      },
+      "ResourceZones": {
+        "Zones": [
+          {
+            "Material": {
+              "Quantity": 227.0,
+              "ReserveAmount": -1.0,
+              "LifetimeAmountGrown": 227.0,
+              "ReserveRemaining": "Infinity",
+              "Maximum": 1500.0,
+              "Growth": 2.0
+            },
+            "WorldPosition": "-5692.35,50,-5707.368",
+            "Name": "Uncharted resource",
+            "Description": "-",
+            "Radius": 175.0,
+            "Id": {
+              "Id": 623071256
+            }
+          }
+        ],
+        "Dumps": []
+      },
+      "Territory": {
+        "Info": [
+          [
+            {
+              "O": {
+                "Id": -1
+              },
+              "H": {
+                "Id": -1
+              },
+              "S": 0,
+              "MaxS": 0
+            },
+            {
+              "O": {
+                "Id": -1
+              },
+              "H": {
+                "Id": -1
+              },
+              "S": 0,
+              "MaxS": 0
+            },
+            {
+              "O": {
+                "Id": -1
+              },
+              "H": {
+                "Id": -1
+              },
+              "S": 0,
+              "MaxS": 0
+            }
+          ],
+          [
+            {
+              "O": {
+                "Id": -1
+              },
+              "H": {
+                "Id": -1
+              },
+              "S": 0,
+              "MaxS": 0
+            },
+            {
+              "O": {
+                "Id": -1
+              },
+              "H": {
+                "Id": -1
+              },
+              "S": 0,
+              "MaxS": 0
+            },
+            {
+              "O": {
+                "Id": -1
+              },
+              "H": {
+                "Id": -1
+              },
+              "S": 0,
+              "MaxS": 0
+            }
+          ],
+          [
+            {
+              "O": {
+                "Id": -1
+              },
+              "H": {
+                "Id": -1
+              },
+              "S": 0,
+              "MaxS": 0
+            },
+            {
+              "O": {
+                "Id": -1
+              },
+              "H": {
+                "Id": -1
+              },
+              "S": 0,
+              "MaxS": 0
+            },
+            {
+              "O": {
+                "Id": -1
+              },
+              "H": {
+                "Id": -1
+              },
+              "S": 0,
+              "MaxS": 0
+            }
+          ]
+        ]
+      },
+      "Factions": {
+        "Factions": [
+          {
+            "Id": {
+              "Id": 783346167
+            },
+            "Players": {
+              "SpawnPoints": [
+                {
+                  "ForceId": {
+                    "Id": -1
+                  },
+                  "Position": "-5382,9,-5328",
+                  "RotationYaw": -157.0,
+                  "ReferenceFrame": 0,
+                  "Description": "Undescribed",
+                  "Name": "New Spawn Point",
+                  "Id": {
+                    "Id": 602729032
+                  },
+                  "ChairIndex": 0,
+                  "Reuse": 1
+                }
+              ],
+              "PersistentPlayerInfo": []
+            },
+            "Fleets": {
+              "Id": {
+                "Id": 783346167
+              },
+              "Fleets": [
+                {
+                  "Forces": [
+                    {
+                      "MinimumRPFractionalCost": 0.0,
+                      "Id": {
+                        "Id": 574529049
+                      },
+                      "FactionId": {
+                        "Id": 783346167
+                      },
+                      "FleetId": {
+                        "FactionId": {
+                          "Id": 783346167
+                        },
+                        "ObjectId": {
+                          "Id": 1826216128
+                        }
+                      },
+                      "ConstructableId": -1,
+                      "ExternalFileSourceBlueprintSaveIndex": -1,
+                      "Name": "multiplayer_starter_raft",
+                      "DesignId": {
+                        "FactionId": {
+                          "Id": 783346167
+                        },
+                        "ObjectId": {
+                          "Id": 1261185262
+                        }
+                      },
+                      "PositionInFleet": "0,0,0",
+                      "IdealPositionInFleet": "0,0,0",
+                      "YawRotationInFleet": 0.0,
+                      "IdealYawRotationInFleet": 0.0,
+                      "State": 1,
+                      "IsFlagship": true,
+                      "CSI": {
+                        "CSI": [
+                          0.0,
+                          3.0,
+                          0.0,
+                          0.0,
+                          0.0,
+                          0.0,
+                          0.0,
+                          800.0,
+                          0.001937406,
+                          0.0,
+                          0.0,
+                          1.0,
+                          1.0,
+                          0.0,
+                          0.0,
+                          0.0,
+                          0.0,
+                          0.0,
+                          1.0,
+                          3.0,
+                          4.78454,
+                          -1.0,
+                          0.0,
+                          0.0,
+                          0.0,
+                          0.0,
+                          0.0,
+                          0.0,
+                          -1.0,
+                          0.0,
+                          51.23082,
+                          5.0,
+                          5.0,
+                          5.0,
+                          5.0,
+                          5.0,
+                          1.0,
+                          0.0,
+                          0.0,
+                          4000.0,
+                          4000.0,
+                          0.0,
+                          5.0,
+                          5.0,
+                          5.0,
+                          0.0,
+                          0.0,
+                          0.0,
+                          0.0,
+                          0.0,
+                          5.0,
+                          0.0,
+                          0.0,
+                          494.0,
+                          0.0,
+                          0.0,
+                          0.0,
+                          0.0,
+                          0.0,
+                          0.0
+                        ]
+                      },
+                      "MaximumDimensions": {
+                        "x": 13,
+                        "y": 2,
+                        "z": 7,
+                        "sqrMagnitude": 222
+                      },
+                      "MinimumDimensions": {
+                        "x": -13,
+                        "y": 0,
+                        "z": -11,
+                        "sqrMagnitude": 290
+                      },
+                      "ConstructableType": 1,
+                      "Spawned": false,
+                      "ResourceCost": {
+                        "Material": 1397.0
+                      },
+                      "RepairMode": 0,
+                      "BattleSpawnOrder": 0,
+                      "SpawnSpecialInstructions": 0,
+                      "Mandate": 0,
+                      "ReplacementOptions": 3,
+                      "Description": "",
+                      "AiModeOverride": 0,
+                      "DronePorts": []
+                    }
+                  ],
+                  "Orders": [],
+                  "LoopIndex": -1,
+                  "Name": "New fleet",
+                  "Id": {
+                    "FactionId": {
+                      "Id": 783346167
+                    },
+                    "ObjectId": {
+                      "Id": 1826216128
+                    }
+                  },
+                  "Position": "-5688.649,0.6824336,-5743.425",
+                  "Rotation": "0,0.002792722,0,0.9999961",
+                  "SpecialFleetId": {
+                    "FactionId": {
+                      "Id": -1
+                    },
+                    "ObjectId": {
+                      "Id": -1
+                    }
+                  },
+                  "eSpecificCategory": 0,
+                  "eNameSource": 2,
+                  "eObjective": 11,
+                  "HqFleetInfo": null,
+                  "SpawnTime": 0.0,
+                  "Spawned": false,
+                  "SpawnConstaints": null,
+                  "FleetInfoToTakeResourceFrom": [],
+                  "FleetInfoToGiveResourceTo": []
+                }
+              ]
+            },
+            "ResourceStore": {
+              "Material": {
+                "Type": 10,
+                "Quantity": 1000.0,
+                "Maximum": "Infinity",
+                "Fraction": 0.0,
+                "HeadRoom": "Infinity"
+              },
+              "TeamId": {
+                "Id": 783346167
+              }
+            },
+            "eController": 0,
+            "Role": 0,
+            "AllowableOverrides": 1,
+            "RPFactor": 1.0,
+            "Favourites": {
+              "Favourites": []
+            },
+            "VolumeAllowance": "Infinity"
+          },
+          {
+            "Id": {
+              "Id": 1353551925
+            },
+            "Players": {
+              "SpawnPoints": [],
+              "PersistentPlayerInfo": []
+            },
+            "Fleets": {
+              "Id": {
+                "Id": 1353551925
+              },
+              "Fleets": []
+            },
+            "ResourceStore": {
+              "Material": {
+                "Type": 10,
+                "Quantity": 1000.0,
+                "Maximum": "Infinity",
+                "Fraction": 0.0,
+                "HeadRoom": "Infinity"
+              },
+              "TeamId": {
+                "Id": 1353551925
+              }
+            },
+            "eController": 1,
+            "Role": 0,
+            "AllowableOverrides": 1,
+            "RPFactor": 1.0,
+            "Favourites": {
+              "Favourites": []
+            },
+            "VolumeAllowance": "Infinity"
+          }
+        ],
+        "Relationships": {
+          "R": [
+            [
+              0.0,
+              -60.0
+            ],
+            [
+              -60.0,
+              0.0
+            ]
+          ],
+          "RBuildUp": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ]
+          ],
+          "RInfluence": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ]
+          ],
+          "FactionIds": [
+            {
+              "Id": 783346167
+            },
+            {
+              "Id": 1353551925
+            }
+          ]
+        }
+      },
+      "VictoryConditions": {
+        "GroupConditions": [],
+        "PartialConditions": [],
+        "FullConditions": []
+      },
+      "EventSystem": {
+        "Events": []
+      },
+      "MarkerSystem": {
+        "Markers": []
+      },
+      "GameConfiguration": {
+        "AirDragFactorAttribute": {
+          "Value": 1.0,
+          "AllowModification": true,
+          "Modified": false,
+          "BlockModification": false
+        },
+        "WaterDragFactorAttribute": {
+          "Value": 1.0,
+          "AllowModification": true,
+          "Modified": false,
+          "BlockModification": false
+        },
+        "MassFactorAttribute": {
+          "Value": 1.0,
+          "AllowModification": true,
+          "Modified": false,
+          "BlockModification": false
+        },
+        "BuoyancyFactorAttribute": {
+          "Value": 1.25,
+          "AllowModification": true,
+          "Modified": false,
+          "BlockModification": false
+        },
+        "PropulsionForceFactorAttribute": {
+          "Value": 1.25,
+          "AllowModification": true,
+          "Modified": false,
+          "BlockModification": false
+        },
+        "RawResourceStoragePerVolumeAttribute": {
+          "Value": 2000.0,
+          "AllowModification": true,
+          "Modified": false,
+          "BlockModification": false
+        },
+        "DamageMultiplier": {
+          "Value": 1.0,
+          "AllowModification": true,
+          "Modified": false,
+          "BlockModification": false
+        },
+        "AutomaticDetection": {
+          "Value": 1.0,
+          "AllowModification": true,
+          "Modified": false,
+          "BlockModification": false
+        }
+      },
+      "Adventure": {
+        "WarpGates": [],
+        "CurrentPlaneType": 1,
+        "TimeInWarpPlane": 0.0,
+        "WarpPlaneDifficulty": 1.0,
+        "PrimaryForceId": null,
+        "PrimaryForcePositions": {
+          "Buffer": [
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0",
+            "0,0,0"
+          ],
+          "Size": 60,
+          "CurrentRecord": -1,
+          "CurrentPositionInBuffer": -1
+        },
+        "TimeSinceWeLoggedPosition": 0.0,
+        "DistanceTravelledSinceWarpGateSpawned": 0.0,
+        "DistanceTravelledSinceForcesSpawned": 0.0,
+        "DistanceTravelledSinceResourceSpawned": 0.0,
+        "HunterFleetBuildUp": 0.0,
+        "InstanceWeatherPoorness": 0.0
+      }
+    }
+  ],
+  "Type": 2
+}

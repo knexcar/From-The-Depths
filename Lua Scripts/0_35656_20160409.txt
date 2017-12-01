@@ -1,0 +1,3 @@
+function Update(I)
+I:Log('Hello') ;
+end
